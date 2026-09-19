@@ -1,0 +1,11 @@
+# Virtual environment — NEVER copy this between machines, it hardcodes absolute
+# paths. `uv sync` rebuilds it from uv.lock in seconds.
+.venv/
+__pycache__/
+*.pyc
+
+# Credentials. The service-account key must never be committed.
+# Keep it in ..\secrets\ (outside this folder), not here.
+*.json
+!claude_desktop_config.example.json
+.env

@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "ga4": {
+      "command": "C:\\Users\\Shei\\.local\\bin\\uv.exe",
+      "args": [
+        "--directory",
+        "C:\\Users\\Shei\\Documents\\Code Claude Windows\\mcp-server",
+        "run",
+        "server.py"
+      ],
+      "env": {
+        "GOOGLE_APPLICATION_CREDENTIALS": "C:\\Users\\Shei\\Documents\\Code Claude Windows\\secrets\\ga4-sa.json",
+        "GA4_DEFAULT_SITE": "GA4 se",
+        "PYTHONUTF8": "1"
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+[project]
+name = "ga4-mcp"
+version = "1.0.0"
+description = "GA4 MCP server for Claude Desktop — multi-property (SE/DK/FI/NL/NO)"
+requires-python = ">=3.10"
+dependencies = [
+    # <2 ceiling is deliberate: MCP SDK 2.0 renamed Tool.inputSchema -> input_schema
+    # and broke fresh installs of GA4 MCP servers. Lift it only after testing.
+    "mcp[cli]>=1.24,<2",
+    "google-analytics-data>=0.23.1",
+]
+
+[dependency-groups]
+dev = []
+
+[tool.uv]
+package = false
