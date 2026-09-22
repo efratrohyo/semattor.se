@@ -1,6 +1,7 @@
-# GA4 MCP Server — multi-property
+# GA4 + Search Console MCP Server
 
-Query five GA4 properties from Claude Desktop. One service-account key covers all of them.
+Query five GA4 properties **and** Google Search Console from Claude Desktop.
+One service-account key covers everything.
 
 | Site | Property ID | Short forms accepted |
 |---|---|---|
@@ -56,6 +57,16 @@ commit it, it is what makes the setup reproducible on another machine.
 Save the service-account JSON to
 `C:\Users\Shei\Documents\Code Claude Windows\secrets\ga4-sa.json`.
 
+### 4b. Grant the service account Search Console access
+
+**Separate from GA4, and separate from enabling the API.** For each property:
+
+> Search Console → select property → **Settings** → **Users and permissions**
+> → **Add user** → paste the service-account email → **Full** → Add
+
+Skip this and every `gsc_*` call returns 403. `list_gsc_sites` returning an empty list
+is the symptom.
+
 ### 5. Prove access before involving Claude Desktop
 
 ```powershell
@@ -63,8 +74,11 @@ $env:GOOGLE_APPLICATION_CREDENTIALS = "C:\Users\Shei\Documents\Code Claude Windo
 uv run smoke_test.py
 ```
 
-This checks **all five properties** and prints last-7-days sessions for each.
-Do not continue until every row says `[ OK ]`.
+This checks **all five GA4 properties** and prints last-7-days sessions for each, then
+lists your Search Console properties. Do not continue until every row says `[ OK ]`.
+
+GA4 and GSC are reported separately — one can pass while the other fails, because they
+need separate grants.
 
 A `[FAIL]` with *permission denied* means that property is missing the grant:
 GA4 Admin → Property Access Management → add the service-account email (the
@@ -83,9 +97,16 @@ leaves it running and the config will not reload — and reopen it.
 
 > Using the ga4 tools, compare sessions and users across all markets for the last 28 days.
 
+Then the combined question, which is the point of having both:
+
+> Using the ga4 tools, show my top 10 pages by views for the last 28 days. Then using the
+> gsc tools, show my top 10 search queries for the same period. Put them side by side.
+
 ---
 
 ## Tools
+
+### GA4 (analytics — what people did on the site)
 
 | Tool | What it does |
 |---|---|
@@ -95,6 +116,27 @@ leaves it running and the config will not reload — and reopen it.
 | `top_pages` | Most-viewed pages for one site |
 | `run_realtime_report` | Active users now (~last 30 min) |
 | `get_metadata` | Valid dimension/metric names for a property, incl. custom ones |
+
+### Search Console (search — what people searched to get there)
+
+| Tool | What it does |
+|---|---|
+| `list_gsc_sites` | **Run first.** Verified properties + permission level |
+| `gsc_search_analytics` | Clicks, impressions, CTR, position by query/page/country/device/date |
+| `gsc_top_queries` | Top search queries by clicks |
+| `gsc_list_sitemaps` | Submitted sitemaps, errors, warnings, indexed counts |
+| `gsc_inspect_url` | Index status, canonicals, last crawl, robots state for one URL |
+
+Two differences from the GA4 tools worth knowing:
+
+- **Dates.** GA4 takes `28daysAgo`; Search Console needs `YYYY-MM-DD`. The tools accept
+  both and translate for you.
+- **Freshness.** Search Console data lags 2–3 days, so `end_date` defaults to `3daysAgo`,
+  not `yesterday`. Ending at `yesterday` returns partial or empty rows.
+
+GSC properties are identified by URL, not numeric ID. Short names (`se`, `dk`) are mapped
+in `GSC_SITES` in `server.py`; a full `sc-domain:example.com` or `https://www.example.com/`
+always works too.
 
 `compare_sites` is the reason the multi-property setup earns its keep — it runs
 the query per property and concatenates the rows with a `site` column. A site
@@ -138,8 +180,9 @@ Two rules that make or break it:
 
 ## Adding a sixth market
 
-Add one line to `PROPERTIES` in `server.py`, and grant the **same** service
-account Viewer on that GA4 property. Nothing else changes.
+Add one line to `PROPERTIES` and one to `GSC_SITES` in `server.py`, then grant the
+**same** service account access in both GA4 (Viewer) and Search Console (Full).
+Nothing else changes.
 
 ```python
 PROPERTIES = {
@@ -169,6 +212,22 @@ SDK 2.0 renamed `Tool.inputSchema` and broke fresh installs (#199).
 
 ---
 
+## Rolling back to GA4-only
+
+```powershell
+cd "C:\Users\Shei\Documents\Code Claude Windows\mcp-server"
+Copy-Item server.py server.py.gsc-broken -Force      # keep it for diagnosis
+Copy-Item <your-backup>\server.py server.py -Force   # restore GA4-only
+Get-Process Claude -EA SilentlyContinue | Stop-Process -Force
+```
+
+Reopen Claude Desktop — the six GA4 tools return, the five GSC tools disappear.
+
+You do **not** need to revert `pyproject.toml`: the two extra packages are inert if
+unimported, and leaving them makes a retry quicker. `claude_desktop_config.json` needs no
+revert either. No GA4 code path was changed, so the realistic failure mode is "GSC tools
+error", not "GA4 broke".
+
 ## Troubleshooting
 
 | Symptom | Cause | Fix |
@@ -179,6 +238,10 @@ SDK 2.0 renamed `Tool.inputSchema` and broke fresh installs (#199).
 | `PERMISSION_DENIED` for one market | That property is missing the grant | Add the SA as Viewer in that property's GA4 Access Management |
 | `SERVICE_DISABLED` | Data API not enabled on the Cloud project | Enable "Google Analytics Data API" |
 | Tools appear but every call errors | Read the actual message — errors are translated, not raw | See `%APPDATA%\Claude\logs\mcp-server-ga4.log` |
+| `list_gsc_sites` returns an empty list | Service account not added in Search Console | Settings → Users and permissions → Add user |
+| GSC 404 on a site | `siteUrl` doesn't match exactly | `list_gsc_sites` gives the exact string; trailing slash matters |
+| GSC returns no rows for recent dates | Data lags 2–3 days | Use `end_date` of `3daysAgo` or earlier |
+| `gsc_inspect_url` 429 | Quota | 2,000/day and 600/min per property |
 
 Inspect the tools interactively without Claude Desktop:
 
