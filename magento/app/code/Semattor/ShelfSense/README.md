@@ -16,13 +16,11 @@ Extra:
 
 ## Pinned SKUs on top
 
-- Write one SKU per line. For 3 products, write 3 lines:
+- Write the SKU. For more than one, put a comma between them. For 3 products:
   ```
-  124758-84001-997
-  845144-310-00
-  465749-564-00
+  124758-84001-997, 845144-310-00, 465749-564-00
   ```
-  The first line is shown first, then the second, then the third.
+  The first SKU is shown first, then the second, then the third.
 - There is no limit on how many you can pin.
 - Pinned products go above everything else: sales, newest and score do not matter for them.
   The rest of the products are sorted by the chosen option.
@@ -31,7 +29,7 @@ Extra:
 - If a pinned product is sold out, it goes last (when "Sold out products last" is on).
   When it is back in stock, it goes back to the top at the next update.
 - Only works when the category option is not Standard. Standard never changes anything.
-- To remove a pin: delete the line and save.
+- To remove a pin: delete that SKU (and its comma) and save.
 
 ## Where it is in Magento
 

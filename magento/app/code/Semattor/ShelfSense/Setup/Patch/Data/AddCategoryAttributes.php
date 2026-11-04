@@ -48,7 +48,7 @@ class AddCategoryAttributes implements DataPatchInterface, PatchRevertableInterf
         $eavSetup->addAttribute(Category::ENTITY, self::ATTR_PINNED, [
             'type' => 'text',
             'label' => 'ShelfSense: pinned SKUs on top',
-            'input' => 'textarea',
+            'input' => 'text',
             'required' => false,
             'global' => ScopedAttributeInterface::SCOPE_GLOBAL,
             'visible' => true,

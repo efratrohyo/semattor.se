@@ -34,7 +34,7 @@
                 </select>
             </formElements>
         </field>
-        <field name="shelfsense_pinned_skus" formElement="textarea" sortOrder="20">
+        <field name="shelfsense_pinned_skus" formElement="input" sortOrder="20">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="source" xsi:type="string">category</item>
@@ -43,7 +43,7 @@
             <settings>
                 <dataType>text</dataType>
                 <label translate="true">Pinned SKUs on top (optional)</label>
-                <notice translate="true">Products you always want first. Write one SKU per line. Example for 3 products: write 3 lines, and the first line is shown first. There is no limit. Pinned products go above everything else (sales, newest, score). The rest is sorted by the option above. Use the SKU of the product in this category (for products with sizes: the main SKU). SKUs that are not in this category are ignored. If a pinned product is sold out, it goes last until it is back in stock. Only works when "Sort products by" is not Standard.</notice>
+                <notice translate="true">Products you always want first. Write the SKU. For more than one, put a comma between them, for example: SKU1, SKU2, SKU3. The first SKU is shown first. There is no limit. Pinned products go above everything else (sales, newest, score). The rest is sorted by the option above. Use the SKU of the product in this category (for products with sizes: the main SKU). SKUs that are not in this category are ignored. If a pinned product is sold out, it goes last until it is back in stock. Only works when "Sort products by" is not Standard.</notice>
             </settings>
         </field>
     </fieldset>
