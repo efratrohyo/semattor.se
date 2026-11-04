@@ -2,29 +2,40 @@
 <form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
     <fieldset name="shelfsense" sortOrder="45">
         <settings>
-            <label translate="true">ShelfSense – smart sorting</label>
+            <label translate="true">ShelfSense Sorting</label>
             <collapsible>true</collapsible>
         </settings>
+
         <field name="shelfsense_mode" formElement="select" sortOrder="10">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="source" xsi:type="string">category</item>
-                    <item name="additionalInfo" xsi:type="string" translate="true"><![CDATA[
-<p>What you choose here is the order customers see under <b>"Populärt"</b> (the default sort on the shop). Customers never see the name of the option.</p>
-<ul>
-<li><b>Standard</b> – Same as today. Products follow their position numbers, lowest first (-8, -5, -1, 0 …). ShelfSense does not touch this category.</li>
-<li><b>Newest first</b> – The product added last comes first (highest product ID first).</li>
-<li><b>Most relevant (smart)</b> – Each product gets a score. 50% sales (last 90 days, the last 30 days count double), 25% how new it is (the boost halves every 30 days), 25% your own position numbers. Highest score comes first. Good when you want best sellers on top but still give new products and your own choices a chance.</li>
-<li><b>Best sellers</b> – Most units sold in the last 90 days first. Cancelled and refunded items do not count. All sizes of a product count together. All countries count together.</li>
-</ul>
-<p>In all options except Standard, sold out products go last (can be turned off in settings).</p>
-<p>The order is updated when you save the category and again every night. If you go back to <b>Standard</b>, your old position numbers come back exactly.</p>
-]]></item>
+                    <item name="component" xsi:type="string">Semattor_ShelfSense/js/form/mode-cards</item>
+                    <item name="elementTmpl" xsi:type="string">Semattor_ShelfSense/form/mode-cards</item>
+                    <item name="cards" xsi:type="array">
+                        <item name="standard" xsi:type="array">
+                            <item name="title" xsi:type="string" translate="true">Standard</item>
+                            <item name="text" xsi:type="string" translate="true">Same as today. Lowest position number first. ShelfSense does not touch this category.</item>
+                        </item>
+                        <item name="newest" xsi:type="array">
+                            <item name="title" xsi:type="string" translate="true">Newest first</item>
+                            <item name="text" xsi:type="string" translate="true">The product added last comes first (highest product ID).</item>
+                        </item>
+                        <item name="smart" xsi:type="array">
+                            <item name="title" xsi:type="string" translate="true">Most relevant</item>
+                            <item name="text" xsi:type="string" translate="true">A mix: 50% sales, 25% new products, 25% your position numbers. Best sellers on top, but new products and your choices still get a chance.</item>
+                        </item>
+                        <item name="bestseller" xsi:type="array">
+                            <item name="title" xsi:type="string" translate="true">Best sellers</item>
+                            <item name="text" xsi:type="string" translate="true">Most units sold in the last 90 days first. All sizes and all countries count together.</item>
+                        </item>
+                    </item>
                 </item>
             </argument>
             <settings>
                 <dataType>string</dataType>
-                <label translate="true">Sort products by</label>
+                <label translate="true">Sort "Populärt" by</label>
+                <notice translate="true">Customers only see the new order, never the name of the option. Sold out products go last. The order updates when you save and every night. Going back to Standard brings your old position numbers back exactly.</notice>
             </settings>
             <formElements>
                 <select>
@@ -34,17 +45,37 @@
                 </select>
             </formElements>
         </field>
+
         <field name="shelfsense_pinned_skus" formElement="input" sortOrder="20">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="source" xsi:type="string">category</item>
+                    <item name="placeholder" xsi:type="string">SKU1, SKU2, SKU3</item>
+                    <item name="imports" xsi:type="array">
+                        <item name="visible" xsi:type="string">${ $.parentName }.shelfsense_mode:hasActiveMode</item>
+                    </item>
                 </item>
             </argument>
             <settings>
                 <dataType>text</dataType>
-                <label translate="true">Pinned SKUs on top (optional)</label>
-                <notice translate="true">Products you always want first. Write the SKU. For more than one, put a comma between them, for example: SKU1, SKU2, SKU3. The first SKU is shown first. There is no limit. Pinned products go above everything else (sales, newest, score). The rest is sorted by the option above. Use the SKU of the product in this category (for products with sizes: the main SKU). SKUs that are not in this category are ignored. If a pinned product is sold out, it goes last until it is back in stock. Only works when "Sort products by" is not Standard.</notice>
+                <label translate="true">Pinned on top (optional)</label>
+                <notice translate="true">Products you always want first. Put a comma between SKUs: SKU1, SKU2, SKU3. The first SKU is shown first. No limit. Pinned products go above everything else. If a pinned product is sold out, it goes last until it is back in stock. For products with sizes, use the main SKU.</notice>
             </settings>
         </field>
+
+        <container name="shelfsense_preview" sortOrder="30">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="component" xsi:type="string">Semattor_ShelfSense/js/form/preview</item>
+                    <item name="template" xsi:type="string">Semattor_ShelfSense/form/preview</item>
+                    <item name="previewUrl" xsi:type="url" path="shelfsense/preview/index"/>
+                    <item name="imports" xsi:type="array">
+                        <item name="mode" xsi:type="string">${ $.parentName }.shelfsense_mode:value</item>
+                        <item name="pinned" xsi:type="string">${ $.parentName }.shelfsense_pinned_skus:value</item>
+                        <item name="categoryId" xsi:type="string">${ $.provider }:data.entity_id</item>
+                    </item>
+                </item>
+            </argument>
+        </container>
     </fieldset>
 </form>

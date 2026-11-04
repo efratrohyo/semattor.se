@@ -113,6 +113,54 @@ class Applier
         );
     }
 
+    /**
+     * Live preview for the admin form, using the values on screen (not yet saved).
+     *
+     * @return array{total: int, items: array<int, array<string, mixed>>, notInCategory: string[], lastUpdated: ?string}
+     */
+    public function previewWith(int $categoryId, string $mode, string $pinnedRaw, int $limit = 12): array
+    {
+        $baseline = $this->positions->getBaseline($categoryId);
+        $active = in_array($mode, SortMode::activeModes(), true);
+        $pinned = $active ? $this->parseSkus($pinnedRaw) : [];
+
+        $items = $active
+            ? $this->ranker->rank($mode, $baseline, $pinned)
+            : $this->ranker->currentOrder($baseline);
+
+        $inCategory = [];
+        foreach ($items as $item) {
+            $inCategory[mb_strtolower($item->sku)] = true;
+        }
+        $notInCategory = array_values(array_filter(
+            $pinned,
+            static fn (string $sku): bool => !isset($inCategory[mb_strtolower($sku)])
+        ));
+
+        $rows = [];
+        $now = time();
+        foreach (array_slice($items, 0, $limit) as $item) {
+            $rows[] = [
+                'id' => $item->productId,
+                'sku' => $item->sku,
+                'name' => $item->name,
+                'position' => $item->baselinePosition,
+                'sold' => (int)round($item->qtySold),
+                'isNew' => $item->newTimestamp > $now - 60 * 86400,
+                'soldOut' => !$item->sellable,
+                'pinned' => $item->pinned,
+                'score' => $mode === SortMode::SMART ? round($item->score, 2) : null,
+            ];
+        }
+
+        return [
+            'total' => count($items),
+            'items' => $rows,
+            'notInCategory' => $notInCategory,
+            'lastUpdated' => $this->positions->getLastUpdated($categoryId),
+        ];
+    }
+
     private function applySettings(int $categoryId, array $settings): array
     {
         if (!$this->config->isEnabled()) {
@@ -127,9 +175,11 @@ class Applier
                 $categoryId,
                 array_map(static fn (RankedItem $i): int => $i->productId, $ranked)
             );
+            $this->positions->markUpdated($categoryId, count($changed));
             $action = 'sorted';
         } elseif ($this->positions->hasBackup($categoryId)) {
             $changed = $this->positions->restore($categoryId);
+            $this->positions->clearUpdated($categoryId);
             $action = 'restored original order';
         } else {
             return $settings + ['action' => 'untouched (Standard)', 'changed' => 0];
@@ -163,7 +213,7 @@ class Applier
     /**
      * @return string[]
      */
-    private function parseSkus(string $raw): array
+    public function parseSkus(string $raw): array
     {
         $skus = preg_split('/[\s,;]+/u', $raw, -1, PREG_SPLIT_NO_EMPTY) ?: [];
         return array_values(array_unique($skus));

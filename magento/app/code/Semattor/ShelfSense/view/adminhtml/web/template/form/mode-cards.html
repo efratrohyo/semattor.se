@@ -1,0 +1,15 @@
+<div class="shelfsense-cards" role="radiogroup">
+    <each args="data: options, as: 'option'">
+        <button type="button"
+                class="shelfsense-card"
+                role="radio"
+                css="'is-selected': $parent.isSelected(option)"
+                attr="'aria-checked': $parent.isSelected(option) ? 'true' : 'false'"
+                click="$parent.choose.bind($parent, option)"
+                disable="$parent.disabled">
+            <span class="shelfsense-card__dot" aria-hidden="true"></span>
+            <span class="shelfsense-card__title" text="$parent.cardTitle(option)"></span>
+            <span class="shelfsense-card__text" text="$parent.cardText(option)"></span>
+        </button>
+    </each>
+</div>

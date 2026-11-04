@@ -1,4 +1,4 @@
-# ShelfSense – smart sorting per category (Semattor_ShelfSense)
+# ShelfSense Sorting per category (Semattor_ShelfSense)
 
 Choose, per category, the order customers see under **"Populärt"** (the default sort on the shop).
 Customers never see the name of the option. They only see the new order.
@@ -33,10 +33,19 @@ Extra:
 
 ## Where it is in Magento
 
-1. **Catalog → Categories → choose a category → "ShelfSense – smart sorting"**
-   Choose the option and click **Save**. The order is updated right away, and again every night.
-2. **Stores → Configuration → Catalog → ShelfSense**
-   Turn on/off, sold out last, number of days for sales, weights for "Most relevant", night schedule.
+**Catalog → Categories → choose a category → "ShelfSense Sorting"**
+
+1. Click one of the 4 cards: **Standard**, **Newest first**, **Most relevant** or **Best sellers**.
+   Each card says in one line what it does.
+2. Optional: **Pinned on top** – SKUs you always want first (only shown when a card other than Standard is chosen).
+3. Look at the **preview** under the cards. It shows the first 12 products customers will see
+   under "Populärt" – before you save. Tags show *Pinned*, *New*, *Sold out* and units sold.
+   If a pinned SKU is not in the category, you get a warning.
+4. Click **Save**. The order is updated right away, and again every night.
+   The preview shows when it was last updated.
+
+**Stores → Configuration → Catalog → ShelfSense Sorting** (set once)
+Turn on/off, sold out last, number of days for sales, weights for "Most relevant", night schedule.
 
 ## Where the data comes from
 
@@ -92,7 +101,7 @@ bin/magento setup:di:compile
 bin/magento cache:flush
 ```
 
-## Test without changing anything
+## Command line (optional, for developers)
 
 ```bash
 bin/magento shelfsense:apply --category=123 --dry-run

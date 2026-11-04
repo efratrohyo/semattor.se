@@ -9,5 +9,16 @@
             "PRIMARY": true,
             "SEMATTOR_SHELFSENSE_BACKUP_CATEGORY_ID_CAT_CTGR_ENTT_ENTT_ID": true
         }
+    },
+    "semattor_shelfsense_state": {
+        "column": {
+            "category_id": true,
+            "updated_at": true,
+            "changed": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "SEMATTOR_SHELFSENSE_STATE_CATEGORY_ID_CAT_CTGR_ENTT_ENTT_ID": true
+        }
     }
 }

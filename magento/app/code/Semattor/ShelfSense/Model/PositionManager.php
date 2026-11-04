@@ -16,6 +16,7 @@ use Magento\Framework\DB\Adapter\AdapterInterface;
 class PositionManager
 {
     private const BACKUP_TABLE = 'semattor_shelfsense_position_backup';
+    private const STATE_TABLE = 'semattor_shelfsense_state';
 
     public function __construct(private readonly ResourceConnection $resource)
     {
@@ -110,6 +111,33 @@ class PositionManager
         return array_map('intval', $c->fetchCol(
             $c->select()->distinct()->from($this->table(self::BACKUP_TABLE), ['category_id'])
         ));
+    }
+
+    public function markUpdated(int $categoryId, int $changed): void
+    {
+        $this->connection()->insertOnDuplicate(
+            $this->table(self::STATE_TABLE),
+            ['category_id' => $categoryId, 'updated_at' => gmdate('Y-m-d H:i:s'), 'changed' => $changed],
+            ['updated_at', 'changed']
+        );
+    }
+
+    public function clearUpdated(int $categoryId): void
+    {
+        $this->connection()->delete($this->table(self::STATE_TABLE), ['category_id = ?' => $categoryId]);
+    }
+
+    /**
+     * @return string|null UTC "Y-m-d H:i:s" of the last time ShelfSense sorted this category
+     */
+    public function getLastUpdated(int $categoryId): ?string
+    {
+        $c = $this->connection();
+        $value = $c->fetchOne(
+            $c->select()->from($this->table(self::STATE_TABLE), ['updated_at'])
+                ->where('category_id = ?', $categoryId)
+        );
+        return $value ?: null;
     }
 
     /**

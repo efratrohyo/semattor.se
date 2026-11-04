@@ -11,6 +11,7 @@ class RankedItem
     public float $score = 0.0;
     public bool $pinned = false;
     public int $pinIndex = PHP_INT_MAX;
+    public string $name = '';
 
     public function __construct(
         public readonly int $productId,

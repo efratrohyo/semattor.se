@@ -1,0 +1,31 @@
+<div class="shelfsense-preview" css="'is-loading': loading">
+    <div class="shelfsense-preview__head">
+        <strong class="shelfsense-preview__title" text="heading()"></strong>
+        <span class="shelfsense-preview__meta" text="updatedText()"></span>
+    </div>
+
+    <div class="message message-warning" if="notInCategory().length">
+        <div text="missingText()"></div>
+    </div>
+    <div class="message message-error" if="error()">
+        <div text="error()"></div>
+    </div>
+
+    <ol class="shelfsense-preview__list" if="items().length">
+        <each args="data: items, as: 'item'">
+            <li class="shelfsense-row" css="'is-soldout': item.soldOut">
+                <span class="shelfsense-row__name">
+                    <span text="item.name"></span>
+                    <small text="item.sku"></small>
+                </span>
+                <span class="shelfsense-row__tags">
+                    <span class="shelfsense-tag is-pinned" if="item.pinned" translate="'Pinned'"></span>
+                    <span class="shelfsense-tag is-new" if="item.isNew" translate="'New'"></span>
+                    <span class="shelfsense-tag is-soldout" if="item.soldOut" translate="'Sold out'"></span>
+                    <span class="shelfsense-tag" text="$parent.soldText(item)"></span>
+                </span>
+            </li>
+        </each>
+    </ol>
+    <p class="shelfsense-preview__count" if="items().length" text="countText()"></p>
+</div>

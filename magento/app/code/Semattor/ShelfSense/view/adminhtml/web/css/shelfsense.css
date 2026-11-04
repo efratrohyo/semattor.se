@@ -1,0 +1,59 @@
+/* ShelfSense Sorting – category form */
+.shelfsense-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 12px;
+    max-width: 880px;
+}
+.shelfsense-card {
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 4px 10px;
+    align-content: start;
+    text-align: left;
+    padding: 14px 16px;
+    background: #fff;
+    border: 1px solid #c2c2c2;
+    border-radius: 8px;
+    cursor: pointer;
+    font: inherit;
+    color: #303030;
+    transition: border-color .15s, box-shadow .15s;
+}
+.shelfsense-card:hover { border-color: #007bdb; }
+.shelfsense-card:focus-visible { outline: 2px solid #007bdb; outline-offset: 2px; }
+.shelfsense-card.is-selected { border-color: #007bdb; box-shadow: 0 0 0 1px #007bdb; background: #f4faff; }
+.shelfsense-card__dot {
+    width: 16px; height: 16px; margin-top: 1px;
+    border: 2px solid #adadad; border-radius: 50%;
+    box-sizing: border-box;
+}
+.shelfsense-card.is-selected .shelfsense-card__dot { border: 5px solid #007bdb; }
+.shelfsense-card__title { font-weight: 600; font-size: 14px; }
+.shelfsense-card__text { grid-column: 2; font-size: 12.5px; line-height: 1.45; color: #666; }
+
+.shelfsense-preview {
+    max-width: 880px;
+    margin: 4px 0 24px calc(25% + 30px);
+    border: 1px solid #e3e3e3;
+    border-radius: 8px;
+    padding: 16px 18px;
+    background: #fafafa;
+}
+@media (max-width: 1024px) { .shelfsense-preview { margin-left: 0; } }
+.shelfsense-preview.is-loading { opacity: .55; }
+.shelfsense-preview__head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.shelfsense-preview__title { font-size: 14px; }
+.shelfsense-preview__meta { font-size: 12px; color: #777; }
+.shelfsense-preview__list { margin: 0; padding: 0 0 0 26px; }
+.shelfsense-row { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid #ececec; }
+.shelfsense-row:last-child { border-bottom: 0; }
+.shelfsense-row.is-soldout { color: #999; }
+.shelfsense-row__name { display: grid; min-width: 0; }
+.shelfsense-row__name small { color: #888; font-size: 11.5px; }
+.shelfsense-row__tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
+.shelfsense-tag { font-size: 11px; padding: 2px 8px; border-radius: 99px; background: #eee; color: #555; white-space: nowrap; }
+.shelfsense-tag.is-pinned { background: #e5f1fb; color: #0a5aa0; }
+.shelfsense-tag.is-new { background: #e7f5ec; color: #1f6b3a; }
+.shelfsense-tag.is-soldout { background: #fbe9e7; color: #a33224; }
+.shelfsense-preview__count { margin: 10px 0 0; font-size: 12px; color: #777; }

@@ -72,6 +72,23 @@ class Ranker
     }
 
     /**
+     * Today's order (position numbers, lowest first), without any ShelfSense rules.
+     *
+     * @param array<int,int> $baseline
+     * @return RankedItem[]
+     */
+    public function currentOrder(array $baseline): array
+    {
+        if ($baseline === []) {
+            return [];
+        }
+        $items = $this->loadItems($baseline);
+        usort($items, static fn (RankedItem $a, RankedItem $b): int =>
+            $a->baselinePosition <=> $b->baselinePosition ?: $a->productId <=> $b->productId);
+        return $items;
+    }
+
+    /**
      * @return callable(RankedItem, RankedItem): int
      */
     private function comparator(string $mode): callable
@@ -140,7 +157,7 @@ class Ranker
         $collection = $this->productCollectionFactory->create();
         $collection->setStoreId(0)
             ->addIdFilter($ids)
-            ->addAttributeToSelect(['status']);
+            ->addAttributeToSelect(['status', 'name']);
 
         $skuById = [];
         foreach ($collection as $product) {
@@ -154,7 +171,7 @@ class Ranker
             $id = (int)$product->getId();
             $created = strtotime((string)$product->getData('created_at')) ?: 0;
 
-            $items[] = new RankedItem(
+            $item = new RankedItem(
                 $id,
                 (string)$product->getSku(),
                 (int)$baseline[$id],
@@ -163,6 +180,8 @@ class Ranker
                 $trend[$id] ?? 0.0,
                 ($stock[$id] ?? true) && (int)$product->getData('status') !== Status::STATUS_DISABLED
             );
+            $item->name = (string)$product->getName();
+            $items[] = $item;
         }
         return $items;
     }

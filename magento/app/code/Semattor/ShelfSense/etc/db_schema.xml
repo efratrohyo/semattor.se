@@ -14,4 +14,16 @@
                     table="semattor_shelfsense_position_backup" column="category_id"
                     referenceTable="catalog_category_entity" referenceColumn="entity_id" onDelete="CASCADE"/>
     </table>
+    <!-- When ShelfSense last sorted each category (shown in admin). -->
+    <table name="semattor_shelfsense_state" resource="default" engine="innodb" comment="ShelfSense last update per category">
+        <column xsi:type="int" name="category_id" unsigned="true" nullable="false" comment="Category ID"/>
+        <column xsi:type="datetime" name="updated_at" nullable="false" comment="Last update (UTC)"/>
+        <column xsi:type="int" name="changed" unsigned="true" nullable="false" default="0" comment="Positions changed"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="category_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="SEMATTOR_SHELFSENSE_STATE_CATEGORY_ID_CAT_CTGR_ENTT_ENTT_ID"
+                    table="semattor_shelfsense_state" column="category_id"
+                    referenceTable="catalog_category_entity" referenceColumn="entity_id" onDelete="CASCADE"/>
+    </table>
 </schema>
