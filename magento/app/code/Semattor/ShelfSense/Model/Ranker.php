@@ -6,6 +6,7 @@ namespace Semattor\ShelfSense\Model;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\DB\Sql\Expression;
 use Semattor\ShelfSense\Model\Source\SortMode;
 
 /**
@@ -140,7 +141,11 @@ class Ranker
             ->addIdFilter($ids)
             ->addAttributeToSelect(['news_from_date', 'status']);
 
-        $stock = $this->loadStock($ids);
+        $skuById = [];
+        foreach ($collection as $product) {
+            $skuById[(int)$product->getId()] = (string)$product->getSku();
+        }
+        $stock = $this->loadStock($skuById);
         [$sold, $trend] = $this->loadSales($ids);
 
         $items = [];
@@ -165,20 +170,57 @@ class Ranker
     }
 
     /**
-     * @param int[] $ids
+     * Salable per product. Uses the MSI stock index of the stocks assigned to the
+     * websites (e.g. "Combined Stock" = inventory_stock_2); a product counts as
+     * sellable if it is salable in any of them. Falls back to the legacy
+     * cataloginventory_stock_status table when MSI is not installed.
+     * Products missing from the index are treated as sellable (unknown ≠ sold out).
+     *
+     * @param array<int,string> $skuById
      * @return array<int,bool>
      */
-    private function loadStock(array $ids): array
+    private function loadStock(array $skuById): array
     {
-        $connection = $this->resource->getConnection();
-        $table = $this->resource->getTableName('cataloginventory_stock_status');
-        if (!$connection->isTableExists($table)) {
+        if ($skuById === []) {
             return [];
         }
+        $connection = $this->resource->getConnection();
+        $channelTable = $this->resource->getTableName('inventory_stock_sales_channel');
+
+        if ($connection->isTableExists($channelTable)) {
+            $stockIds = $connection->fetchCol(
+                $connection->select()->distinct()
+                    ->from($channelTable, ['stock_id'])
+                    ->where('type = ?', 'website')
+            );
+            $salableBySku = [];
+            foreach ($stockIds as $stockId) {
+                $table = $this->resource->getTableName('inventory_stock_' . (int)$stockId);
+                if (!$connection->isTableExists($table)) {
+                    continue;
+                }
+                $rows = $connection->fetchPairs(
+                    $connection->select()
+                        ->from($table, ['sku', 'is_salable'])
+                        ->where('sku IN (?)', array_values($skuById))
+                );
+                foreach ($rows as $sku => $salable) {
+                    $key = mb_strtolower((string)$sku);
+                    $salableBySku[$key] = ($salableBySku[$key] ?? false) || (int)$salable === 1;
+                }
+            }
+            $result = [];
+            foreach ($skuById as $id => $sku) {
+                $result[$id] = $salableBySku[mb_strtolower($sku)] ?? true;
+            }
+            return $result;
+        }
+
+        $table = $this->resource->getTableName('cataloginventory_stock_status');
         $rows = $connection->fetchPairs(
             $connection->select()
                 ->from($table, ['product_id', 'stock_status'])
-                ->where('product_id IN (?)', $ids)
+                ->where('product_id IN (?)', array_keys($skuById))
                 ->where('website_id = ?', 0)
         );
         return array_map(static fn ($s): bool => (int)$s === 1, $rows);
@@ -200,12 +242,17 @@ class Ranker
         $from = gmdate('Y-m-d H:i:s', time() - $days * 86400);
         $trendFrom = gmdate('Y-m-d H:i:s', time() - $trendDays * 86400);
 
+        // Grouped products are sold as their child lines, so credit the parent with them.
+        $childToParent = $this->groupedChildren($ids);
+        $inCategory = array_flip($ids);
+        $lookupIds = array_values(array_unique(array_merge($ids, array_keys($childToParent))));
+
         $net = 'GREATEST(oi.qty_ordered - IFNULL(oi.qty_canceled, 0) - IFNULL(oi.qty_refunded, 0), 0)';
         $select = $connection->select()
             ->from(['oi' => $this->resource->getTableName('sales_order_item', 'sales')], [
                 'product_id',
-                'qty' => new \Zend_Db_Expr("SUM($net)"),
-                'trend' => new \Zend_Db_Expr($connection->quoteInto(
+                'qty' => new Expression("SUM($net)"),
+                'trend' => new Expression($connection->quoteInto(
                     "SUM(IF(oi.created_at >= ?, $net, 0))",
                     $trendFrom
                 )),
@@ -215,16 +262,43 @@ class Ranker
                 'o.entity_id = oi.order_id',
                 []
             )
-            ->where('oi.product_id IN (?)', $ids)
+            ->where('oi.product_id IN (?)', $lookupIds)
             ->where('oi.created_at >= ?', $from)
             ->where('o.state NOT IN (?)', ['canceled', 'closed'])
             ->group('oi.product_id');
 
         $sold = $trend = [];
         foreach ($connection->fetchAll($select) as $row) {
-            $sold[(int)$row['product_id']] = (float)$row['qty'];
-            $trend[(int)$row['product_id']] = (float)$row['trend'];
+            $productId = (int)$row['product_id'];
+            $targets = $childToParent[$productId] ?? [];
+            if (isset($inCategory[$productId])) {
+                $targets[] = $productId;
+            }
+            foreach (array_unique($targets) as $target) {
+                $sold[$target] = ($sold[$target] ?? 0.0) + (float)$row['qty'];
+                $trend[$target] = ($trend[$target] ?? 0.0) + (float)$row['trend'];
+            }
         }
         return [$sold, $trend];
+    }
+
+    /**
+     * @param int[] $ids
+     * @return array<int,int[]> childId => grouped parent IDs (only parents in $ids)
+     */
+    private function groupedChildren(array $ids): array
+    {
+        $connection = $this->resource->getConnection();
+        $rows = $connection->fetchAll(
+            $connection->select()
+                ->from($this->resource->getTableName('catalog_product_link'), ['product_id', 'linked_product_id'])
+                ->where('product_id IN (?)', $ids)
+                ->where('link_type_id = ?', \Magento\GroupedProduct\Model\ResourceModel\Product\Link::LINK_TYPE_GROUPED)
+        );
+        $map = [];
+        foreach ($rows as $row) {
+            $map[(int)$row['linked_product_id']][] = (int)$row['product_id'];
+        }
+        return $map;
     }
 }

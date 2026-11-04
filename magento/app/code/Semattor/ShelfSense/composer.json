@@ -9,7 +9,8 @@
         "magento/module-catalog": "*",
         "magento/module-catalog-inventory": "*",
         "magento/module-catalog-search": "*",
-        "magento/module-sales": "*"
+        "magento/module-sales": "*",
+        "magento/module-grouped-product": "*"
     },
     "autoload": {
         "files": ["registration.php"],
