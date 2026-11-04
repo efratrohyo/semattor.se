@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <fieldset name="rugrank" sortOrder="45">
+        <settings>
+            <label translate="true">RugRank – smart sortering</label>
+            <collapsible>true</collapsible>
+        </settings>
+        <field name="rugrank_mode" formElement="select" sortOrder="10">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">category</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>string</dataType>
+                <label translate="true">Sortera produkter efter</label>
+                <notice translate="true">"Standard" = kategorin följer sina positionsnummer precis som idag. Väljer du något annat räknar RugRank om positionerna (sparar och varje natt). Går du tillbaka till "Standard" återställs den gamla ordningen exakt.</notice>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Semattor\RugRank\Model\Source\SortMode"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+        <field name="rugrank_pinned_skus" formElement="textarea" sortOrder="20">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">category</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Fäst SKU:er överst (valfritt)</label>
+                <notice translate="true">En SKU per rad (eller kommaseparerat). Visas först i exakt denna ordning, resten sorteras enligt valet ovan. Används bara när ett sorteringsval är aktivt.</notice>
+            </settings>
+        </field>
+    </fieldset>
+</form>

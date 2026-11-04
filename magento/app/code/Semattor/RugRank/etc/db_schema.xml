@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <!-- Original (manual) positions, saved the first time RugRank takes over a category,
+         so that switching the category back to "Standard" restores the exact old order. -->
+    <table name="semattor_rugrank_position_backup" resource="default" engine="innodb" comment="RugRank original category positions">
+        <column xsi:type="int" name="category_id" unsigned="true" nullable="false" comment="Category ID"/>
+        <column xsi:type="int" name="product_id" unsigned="true" nullable="false" comment="Product ID"/>
+        <column xsi:type="int" name="position" unsigned="false" nullable="false" default="0" comment="Original position"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="category_id"/>
+            <column name="product_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="SEMATTOR_RUGRANK_BACKUP_CATEGORY_ID_CAT_CTGR_ENTT_ENTT_ID"
+                    table="semattor_rugrank_position_backup" column="category_id"
+                    referenceTable="catalog_category_entity" referenceColumn="entity_id" onDelete="CASCADE"/>
+    </table>
+</schema>
