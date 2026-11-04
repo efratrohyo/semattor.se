@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <semattor_shelfsense>
+            <general>
+                <enabled>1</enabled>
+                <cron_expr>15 3 * * *</cron_expr>
+                <out_of_stock_last>1</out_of_stock_last>
+            </general>
+            <bestseller>
+                <days>90</days>
+            </bestseller>
+            <smart>
+                <weight_sales>50</weight_sales>
+                <weight_new>25</weight_new>
+                <weight_manual>25</weight_manual>
+                <new_half_life_days>30</new_half_life_days>
+                <trend_days>30</trend_days>
+            </smart>
+        </semattor_shelfsense>
+    </default>
+</config>

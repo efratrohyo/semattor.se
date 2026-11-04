@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
-    <!-- After the category (incl. its product grid) is committed: apply or restore right away. -->
-    <event name="catalog_category_save_commit_after">
-        <observer name="semattor_rugrank_category_save" instance="Semattor\RugRank\Observer\CategorySaveCommitAfter"/>
-    </event>
-</config>

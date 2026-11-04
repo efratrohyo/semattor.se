@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="semattor_shelfsense_apply" xsi:type="object">Semattor\ShelfSense\Console\Command\ApplyCommand</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Semattor\ShelfSense\Console\Command\ApplyCommand">
+        <arguments>
+            <argument name="applier" xsi:type="object">Semattor\ShelfSense\Model\Applier\Proxy</argument>
+        </arguments>
+    </type>
+</config>

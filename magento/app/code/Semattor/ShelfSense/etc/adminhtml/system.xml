@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="semattor_shelfsense" translate="label" sortOrder="900" showInDefault="1" showInWebsite="0" showInStore="0">
+            <label>ShelfSense – smart kategorisortering</label>
+            <tab>catalog</tab>
+            <resource>Semattor_ShelfSense::config</resource>
+            <group id="general" translate="label" sortOrder="10" showInDefault="1">
+                <label>Allmänt</label>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1">
+                    <label>Aktiverad</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Styr bara kategorier där du valt något annat än "Standard". Övriga kategorier rörs aldrig.</comment>
+                </field>
+                <field id="cron_expr" translate="label comment" type="text" sortOrder="20" showInDefault="1">
+                    <label>Hur ofta sorteringen räknas om (cron)</label>
+                    <comment>Standard: 15 3 * * * (varje natt 03:15). Ändringar på en kategori slår igenom direkt när du sparar den.</comment>
+                </field>
+                <field id="out_of_stock_last" translate="label" type="select" sortOrder="30" showInDefault="1">
+                    <label>Slutsålda produkter sist</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+            <group id="bestseller" translate="label" sortOrder="20" showInDefault="1">
+                <label>Bästsäljare</label>
+                <field id="days" translate="label" type="text" sortOrder="10" showInDefault="1">
+                    <label>Räkna försäljning senaste X dagar</label>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                </field>
+            </group>
+            <group id="smart" translate="label comment" sortOrder="30" showInDefault="1">
+                <label>Mest relevant (smart)</label>
+                <comment>Poäng = försäljning (med extra vikt på senaste trenden) + nyhetsboost + din ursprungliga manuella ordning. Vikterna är relativa.</comment>
+                <field id="weight_sales" translate="label" type="text" sortOrder="10" showInDefault="1">
+                    <label>Vikt: försäljning</label>
+                    <validate>validate-digits</validate>
+                </field>
+                <field id="weight_new" translate="label" type="text" sortOrder="20" showInDefault="1">
+                    <label>Vikt: nyhet</label>
+                    <validate>validate-digits</validate>
+                </field>
+                <field id="weight_manual" translate="label" type="text" sortOrder="30" showInDefault="1">
+                    <label>Vikt: ursprunglig manuell ordning</label>
+                    <validate>validate-digits</validate>
+                </field>
+                <field id="new_half_life_days" translate="label comment" type="text" sortOrder="40" showInDefault="1">
+                    <label>Nyhetsboost halveras efter X dagar</label>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                </field>
+                <field id="trend_days" translate="label comment" type="text" sortOrder="50" showInDefault="1">
+                    <label>Trendfönster (dagar)</label>
+                    <comment>Försäljning inom detta fönster räknas dubbelt.</comment>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
