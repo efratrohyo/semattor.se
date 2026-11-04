@@ -14,7 +14,7 @@
             <settings>
                 <dataType>string</dataType>
                 <label translate="true">Sortera produkter efter</label>
-                <notice translate="true">"Standard" = kategorin följer sina positionsnummer precis som idag. Väljer du något annat räknar ShelfSense om positionerna (sparar och varje natt). Går du tillbaka till "Standard" återställs den gamla ordningen exakt.</notice>
+                <notice translate="true">"Standard" = kategorin visas precis som idag under "Populärt". Väljer du något annat ändrar ShelfSense vad kunden ser under "Populärt" (sparar och varje natt). Går du tillbaka till "Standard" återställs den gamla ordningen exakt.</notice>
             </settings>
             <formElements>
                 <select>

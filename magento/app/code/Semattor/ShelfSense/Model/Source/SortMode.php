@@ -19,7 +19,7 @@ class SortMode extends AbstractSource
     {
         if ($this->_options === null) {
             $this->_options = [
-                ['value' => self::STANDARD, 'label' => __('Standard (befintlig position – rörs inte)')],
+                ['value' => self::STANDARD, 'label' => __('Standard (som idag – rörs inte)')],
                 ['value' => self::NEWEST, 'label' => __('Nyheter först')],
                 ['value' => self::SMART, 'label' => __('Mest relevant (smart)')],
                 ['value' => self::BESTSELLER, 'label' => __('Bästsäljare')],

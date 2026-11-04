@@ -56,8 +56,9 @@ bin/magento shelfsense:apply
 
 ## Bra att veta
 
-- Kategorins **"Standard sortering av produktlistning"** ska vara *Position* (det är den
-  som används idag). Väljer kunden själv t.ex. pris i listan gäller kundens val.
+- Det kunden ser som **"Populärt"** i sorteringsmenyn är Magentos *Position*. Det är den
+  ordningen ShelfSense styr. Kunden ser inga nya val. Väljer kunden själv t.ex. pris gäller
+  kundens val.
 - Ankarkategorier (som visar produkter från underkategorier): bara produkter som ligger
   **direkt** i kategorin får nya positioner.
 - Vill du ändra den manuella ordningen i en kategori med ShelfSense aktivt: sätt först
