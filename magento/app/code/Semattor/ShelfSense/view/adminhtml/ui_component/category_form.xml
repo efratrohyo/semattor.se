@@ -43,7 +43,7 @@
             <settings>
                 <dataType>text</dataType>
                 <label translate="true">Pinned SKUs on top (optional)</label>
-                <notice translate="true">One SKU per line (or separated by commas). These products are always shown first, in this order. The rest is sorted by the option above. Only used when the option is not Standard.</notice>
+                <notice translate="true">Products you always want first. Write one SKU per line. Example for 3 products: write 3 lines, and the first line is shown first. There is no limit. Pinned products go above everything else (sales, newest, score). The rest is sorted by the option above. Use the SKU of the product in this category (for products with sizes: the main SKU). SKUs that are not in this category are ignored. If a pinned product is sold out, it goes last until it is back in stock. Only works when "Sort products by" is not Standard.</notice>
             </settings>
         </field>
     </fieldset>

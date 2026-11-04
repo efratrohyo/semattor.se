@@ -54,13 +54,13 @@ class Ranker
         $oosLast = $this->config->isOutOfStockLast();
 
         usort($items, static function (RankedItem $a, RankedItem $b) use ($strategy, $oosLast): int {
-            // 1) Pinned SKUs first, in the order the merchant typed them.
-            if ($a->pinned || $b->pinned) {
-                return $b->pinned <=> $a->pinned ?: $a->pinIndex <=> $b->pinIndex;
-            }
-            // 2) Sold-out / disabled last.
+            // 1) Sold-out / disabled last – also when pinned, so a sold out product never sits on top.
             if ($oosLast && $a->sellable !== $b->sellable) {
                 return $b->sellable <=> $a->sellable;
+            }
+            // 2) Pinned SKUs first, in the order the merchant typed them.
+            if ($a->pinned || $b->pinned) {
+                return $b->pinned <=> $a->pinned ?: $a->pinIndex <=> $b->pinIndex;
             }
             // 3) Strategy, falling back to the original manual order (stable + predictable).
             return $strategy($a, $b)
