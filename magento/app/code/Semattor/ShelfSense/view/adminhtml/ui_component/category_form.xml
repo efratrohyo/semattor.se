@@ -2,19 +2,29 @@
 <form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
     <fieldset name="shelfsense" sortOrder="45">
         <settings>
-            <label translate="true">ShelfSense – smart sortering</label>
+            <label translate="true">ShelfSense – smart sorting</label>
             <collapsible>true</collapsible>
         </settings>
         <field name="shelfsense_mode" formElement="select" sortOrder="10">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="source" xsi:type="string">category</item>
+                    <item name="additionalInfo" xsi:type="string" translate="true"><![CDATA[
+<p>What you choose here is the order customers see under <b>"Populärt"</b> (the default sort on the shop). Customers never see the name of the option.</p>
+<ul>
+<li><b>Standard</b> – Same as today. Products follow their position numbers, lowest first (-8, -5, -1, 0 …). ShelfSense does not touch this category.</li>
+<li><b>Newest first</b> – The product added last comes first (highest product ID first).</li>
+<li><b>Most relevant (smart)</b> – Each product gets a score. 50% sales (last 90 days, the last 30 days count double), 25% how new it is (the boost halves every 30 days), 25% your own position numbers. Highest score comes first. Good when you want best sellers on top but still give new products and your own choices a chance.</li>
+<li><b>Best sellers</b> – Most units sold in the last 90 days first. Cancelled and refunded items do not count. All sizes of a product count together. All countries count together.</li>
+</ul>
+<p>In all options except Standard, sold out products go last (can be turned off in settings).</p>
+<p>The order is updated when you save the category and again every night. If you go back to <b>Standard</b>, your old position numbers come back exactly.</p>
+]]></item>
                 </item>
             </argument>
             <settings>
                 <dataType>string</dataType>
-                <label translate="true">Sortera produkter efter</label>
-                <notice translate="true">"Standard" = kategorin visas precis som idag under "Populärt". Väljer du något annat ändrar ShelfSense vad kunden ser under "Populärt" (sparar och varje natt). Går du tillbaka till "Standard" återställs den gamla ordningen exakt.</notice>
+                <label translate="true">Sort products by</label>
             </settings>
             <formElements>
                 <select>
@@ -32,8 +42,8 @@
             </argument>
             <settings>
                 <dataType>text</dataType>
-                <label translate="true">Fäst SKU:er överst (valfritt)</label>
-                <notice translate="true">En SKU per rad (eller kommaseparerat). Visas först i exakt denna ordning, resten sorteras enligt valet ovan. Används bara när ett sorteringsval är aktivt.</notice>
+                <label translate="true">Pinned SKUs on top (optional)</label>
+                <notice translate="true">One SKU per line (or separated by commas). These products are always shown first, in this order. The rest is sorted by the option above. Only used when the option is not Standard.</notice>
             </settings>
         </field>
     </fieldset>

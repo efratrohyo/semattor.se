@@ -32,7 +32,7 @@ class AddCategoryAttributes implements DataPatchInterface, PatchRevertableInterf
 
         $eavSetup->addAttribute(Category::ENTITY, self::ATTR_MODE, [
             'type' => 'varchar',
-            'label' => 'ShelfSense: sortera produkter efter',
+            'label' => 'ShelfSense: sort products by',
             'input' => 'select',
             'source' => SortMode::class,
             'required' => false,
@@ -47,7 +47,7 @@ class AddCategoryAttributes implements DataPatchInterface, PatchRevertableInterf
 
         $eavSetup->addAttribute(Category::ENTITY, self::ATTR_PINNED, [
             'type' => 'text',
-            'label' => 'ShelfSense: fästa SKU:er överst',
+            'label' => 'ShelfSense: pinned SKUs on top',
             'input' => 'textarea',
             'required' => false,
             'global' => ScopedAttributeInterface::SCOPE_GLOBAL,
