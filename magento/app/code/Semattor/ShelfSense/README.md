@@ -5,9 +5,9 @@ Välj per kategori i admin hur produkterna ska sorteras:
 | Val | Vad som händer |
 |---|---|
 | **Standard** *(förval)* | Ingenting. Kategorin följer sina positionsnummer exakt som idag. |
-| **Nyheter först** | Nyaste produkten först (skapad-datum, eller "Ny från"-datum om det är satt). |
+| **Nyheter först** | Senast tillagd först = högst produkt-ID först. |
 | **Mest relevant (smart)** | Poäng av försäljning (senaste trenden räknas dubbelt) + nyhetsboost som klingar av + din gamla manuella ordning. |
-| **Bästsäljare** | Flest sålda enheter senaste 90 dagarna (netto, minus avbokat/returnerat). Lika → trend → nyast. |
+| **Bästsäljare** | Flest sålda enheter senaste 90 dagarna (netto, minus avbokat/returnerat). Lika → trend → högst produkt-ID. |
 
 Extra:
 - **Fäst SKU:er överst** – skriv SKU:er (en per rad) som alltid ska ligga först, i den ordningen.

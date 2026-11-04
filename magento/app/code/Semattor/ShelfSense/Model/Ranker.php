@@ -77,12 +77,13 @@ class Ranker
     private function comparator(string $mode): callable
     {
         return match ($mode) {
+            // Newest = most recently added = highest product ID (IDs only ever go up).
             SortMode::NEWEST => static fn (RankedItem $a, RankedItem $b): int =>
-                $b->newTimestamp <=> $a->newTimestamp,
+                $b->productId <=> $a->productId,
             SortMode::BESTSELLER => static fn (RankedItem $a, RankedItem $b): int =>
                 $b->qtySold <=> $a->qtySold
                 ?: $b->qtyTrend <=> $a->qtyTrend
-                ?: $b->newTimestamp <=> $a->newTimestamp,
+                ?: $b->productId <=> $a->productId,
             SortMode::SMART => static fn (RankedItem $a, RankedItem $b): int =>
                 $b->score <=> $a->score,
             default => static fn (): int => 0,
@@ -139,7 +140,7 @@ class Ranker
         $collection = $this->productCollectionFactory->create();
         $collection->setStoreId(0)
             ->addIdFilter($ids)
-            ->addAttributeToSelect(['news_from_date', 'status']);
+            ->addAttributeToSelect(['status']);
 
         $skuById = [];
         foreach ($collection as $product) {
@@ -152,15 +153,12 @@ class Ranker
         foreach ($collection as $product) {
             $id = (int)$product->getId();
             $created = strtotime((string)$product->getData('created_at')) ?: 0;
-            $newsFrom = $product->getData('news_from_date')
-                ? (strtotime((string)$product->getData('news_from_date')) ?: 0)
-                : 0;
 
             $items[] = new RankedItem(
                 $id,
                 (string)$product->getSku(),
                 (int)$baseline[$id],
-                max($created, $newsFrom),
+                $created,
                 $sold[$id] ?? 0.0,
                 $trend[$id] ?? 0.0,
                 ($stock[$id] ?? true) && (int)$product->getData('status') !== Status::STATUS_DISABLED
