@@ -21,6 +21,9 @@ use Semattor\ShelfSense\Setup\Patch\Data\AddCategoryAttributes as Attr;
  */
 class Applier
 {
+    private const TAIL = 100000;
+    private const TAIL_SOLD_OUT = 200000;
+
     public function __construct(
         private readonly Config $config,
         private readonly Ranker $ranker,
@@ -171,10 +174,7 @@ class Applier
         if (in_array($mode, SortMode::activeModes(), true)) {
             $this->positions->backupMissing($categoryId);
             $ranked = $this->ranker->rank($mode, $this->positions->getBaseline($categoryId), $settings['pinned']);
-            $changed = $this->positions->write(
-                $categoryId,
-                array_map(static fn (RankedItem $i): int => $i->productId, $ranked)
-            );
+            $changed = $this->positions->write($categoryId, $this->targetPositions($ranked));
             $this->positions->markUpdated($categoryId, count($changed));
             $action = 'sorted';
         } elseif ($this->positions->hasBackup($categoryId)) {
@@ -189,6 +189,30 @@ class Applier
             $this->refresh($categoryId, $changed);
         }
         return $settings + ['action' => $action, 'changed' => count($changed)];
+    }
+
+    /**
+     * Top X products get 1, 2, 3 … in the new order. The rest get a fixed number based on
+     * their original position, so they only change when a product enters or leaves the top.
+     * This keeps nightly writes (and the reindexing they cause) small.
+     *
+     * @param RankedItem[] $ranked
+     * @return array<int,int> productId => position
+     */
+    private function targetPositions(array $ranked): array
+    {
+        $top = $this->config->getTopCount();
+        $oosLast = $this->config->isOutOfStockLast();
+        $target = [];
+        foreach (array_values($ranked) as $i => $item) {
+            if ($top === 0 || $i < $top) {
+                $target[$item->productId] = $i + 1;
+                continue;
+            }
+            $base = ($oosLast && !$item->sellable) ? self::TAIL_SOLD_OUT : self::TAIL;
+            $target[$item->productId] = $base + $item->baselinePosition;
+        }
+        return $target;
     }
 
     /**

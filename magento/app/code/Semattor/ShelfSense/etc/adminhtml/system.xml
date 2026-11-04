@@ -16,6 +16,11 @@
                     <label>When to update the order (cron)</label>
                     <comment>Default: 15 3 * * * (every night at 03:15). When you save a category, its order is also updated right away.</comment>
                 </field>
+                <field id="top_count" translate="label comment" type="text" sortOrder="25" showInDefault="1">
+                    <label>Sort the top X products</label>
+                    <comment>Default 300. These get an exact new order. The products after them keep their old order (sold out last). This keeps the work small for big categories, because the products further down almost never move. 0 = sort all products.</comment>
+                    <validate>validate-digits</validate>
+                </field>
                 <field id="out_of_stock_last" translate="label" type="select" sortOrder="30" showInDefault="1">
                     <label>Sold out products last</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>

@@ -90,6 +90,21 @@ The shop already sorts "Populärt" by position, so it shows the new order automa
 - The first time a category gets an option, the old position numbers are saved in a backup.
   If you go back to **Standard**, the old order comes back exactly.
 
+## Performance and safety
+
+- **No conflicts by design:** no rewrites, no preferences and no plugins on Magento code.
+  It only adds: 2 category fields, 2 small tables, 1 observer (category save), 1 nightly cron job,
+  1 admin preview page and 1 command. Nothing on the frontend.
+- **Only visible products:** hidden child products (the sizes of a configurable, ~70% of rows)
+  are never read or written.
+- **Only the top is re-ordered:** the top 300 products (setting "Sort the top X products") get
+  an exact new order. The rest keep a fixed position after them, so they almost never change.
+  Fewer changed rows = less reindexing for search, Searchanise and feeds.
+- **Only changed rows are written**, in batches of 500, in one transaction.
+  It only UPDATEs positions. It never adds or removes products.
+- Categories set to Standard cost nothing: nothing is loaded or written.
+- Indexes in "Update by Schedule" pick up the changes through the normal Magento cron.
+
 ## Install
 
 Copy the folder to `app/code/Semattor/ShelfSense` in Magento and run:

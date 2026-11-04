@@ -23,6 +23,14 @@ class Config
         return $this->scopeConfig->isSetFlag(self::PREFIX . 'general/out_of_stock_last');
     }
 
+    /**
+     * How many products at the top get an exact new order. 0 = all.
+     */
+    public function getTopCount(): int
+    {
+        return max(0, $this->int('general/top_count', 300));
+    }
+
     public function getBestsellerDays(): int
     {
         return max(1, $this->int('bestseller/days', 90));

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Semattor\ShelfSense\Model;
 
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
+use Magento\Catalog\Model\Product\Visibility;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Sql\Expression;
@@ -155,8 +156,14 @@ class Ranker
         $ids = array_keys($baseline);
 
         $collection = $this->productCollectionFactory->create();
+        // Only products customers can see in a category list. Hidden child products
+        // (sizes of a configurable) are ~70% of the rows and are left untouched.
         $collection->setStoreId(0)
             ->addIdFilter($ids)
+            ->addAttributeToFilter('visibility', ['in' => [
+                Visibility::VISIBILITY_IN_CATALOG,
+                Visibility::VISIBILITY_BOTH,
+            ]])
             ->addAttributeToSelect(['status', 'name']);
 
         $skuById = [];

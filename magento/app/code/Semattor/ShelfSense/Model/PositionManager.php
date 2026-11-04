@@ -5,6 +5,7 @@ namespace Semattor\ShelfSense\Model;
 
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
+use Magento\Framework\DB\Sql\Expression;
 
 /**
  * Reads/writes catalog_category_product.position and keeps a backup of the merchant's
@@ -76,15 +77,11 @@ class PositionManager
     }
 
     /**
-     * @param int[] $orderedProductIds
+     * @param array<int,int> $target productId => new position
      * @return int[] product IDs whose position actually changed
      */
-    public function write(int $categoryId, array $orderedProductIds): array
+    public function write(int $categoryId, array $target): array
     {
-        $target = [];
-        foreach (array_values($orderedProductIds) as $i => $productId) {
-            $target[(int)$productId] = $i + 1;
-        }
         return $this->applyPositions($categoryId, $target);
     }
 
@@ -157,14 +154,20 @@ class PositionManager
             return [];
         }
 
+        // Batched UPDATE … SET position = CASE product_id … (500 rows per query).
+        // Only UPDATE, never INSERT, so products are never added to a category.
         $c = $this->connection();
         $c->beginTransaction();
         try {
-            foreach ($changed as $productId => $position) {
+            foreach (array_chunk($changed, 500, true) as $chunk) {
+                $cases = [];
+                foreach ($chunk as $productId => $position) {
+                    $cases[] = sprintf('WHEN %d THEN %d', (int)$productId, (int)$position);
+                }
                 $c->update(
                     $this->table('catalog_category_product'),
-                    ['position' => $position],
-                    ['category_id = ?' => $categoryId, 'product_id = ?' => $productId]
+                    ['position' => new Expression('CASE product_id ' . implode(' ', $cases) . ' END')],
+                    ['category_id = ?' => $categoryId, 'product_id IN (?)' => array_keys($chunk)]
                 );
             }
             $c->commit();

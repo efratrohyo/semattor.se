@@ -6,6 +6,7 @@
                 <enabled>1</enabled>
                 <cron_expr>15 3 * * *</cron_expr>
                 <out_of_stock_last>1</out_of_stock_last>
+                <top_count>300</top_count>
             </general>
             <bestseller>
                 <days>90</days>
