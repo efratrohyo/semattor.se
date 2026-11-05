@@ -110,6 +110,26 @@ class PositionManager
         ));
     }
 
+    /**
+     * Save positions the merchant entered in admin as the new Standard order.
+     * Only for products that are in the category.
+     *
+     * @param array<int,int> $positions productId => position
+     */
+    public function captureBaseline(int $categoryId, array $positions): void
+    {
+        $current = $this->getCurrent($categoryId);
+        $rows = [];
+        foreach ($positions as $productId => $position) {
+            if (array_key_exists((int)$productId, $current)) {
+                $rows[] = ['category_id' => $categoryId, 'product_id' => (int)$productId, 'position' => (int)$position];
+            }
+        }
+        foreach (array_chunk($rows, 500) as $chunk) {
+            $this->connection()->insertOnDuplicate($this->table(self::BACKUP_TABLE), $chunk, ['position']);
+        }
+    }
+
     public function markUpdated(int $categoryId, int $changed): void
     {
         $this->connection()->insertOnDuplicate(
@@ -181,7 +201,7 @@ class PositionManager
     /**
      * @return array<int,int>
      */
-    private function getBackup(int $categoryId): array
+    public function getBackup(int $categoryId): array
     {
         $c = $this->connection();
         return array_map('intval', $c->fetchPairs(

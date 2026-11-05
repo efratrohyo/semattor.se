@@ -28,7 +28,12 @@ class CategorySaveCommitAfter implements ObserverInterface
             return;
         }
         try {
-            $this->applier->applyCategory((int)$category->getId());
+            // Set by the admin category save when the "Products in Category" grid was posted.
+            $posted = $category->getData('posted_products');
+            $this->applier->applyCategory(
+                (int)$category->getId(),
+                is_array($posted) ? array_map('intval', $posted) : null
+            );
         } catch (\Throwable $e) {
             // Never break a category save because of sorting.
             $this->logger->error('ShelfSense: ' . $e->getMessage(), ['exception' => $e]);

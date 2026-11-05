@@ -35,7 +35,7 @@
             <settings>
                 <dataType>string</dataType>
                 <label translate="true">Sort "Populärt" by</label>
-                <notice translate="true">Customers only see the new order, never the name of the option. Sold out products go last. The order updates when you save and every night. Going back to Standard brings your old position numbers back exactly.</notice>
+                <notice translate="true">Customers only see the new order, never the name of the option. Sold out products go last. The order updates when you save and every night. While another option than Standard is active, "Products in Category" shows your Standard position numbers. You can change them any time. Customers see those changes when you go back to Standard.</notice>
             </settings>
             <formElements>
                 <select>

@@ -92,10 +92,24 @@ class Applier
         return $report;
     }
 
-    public function applyCategory(int $categoryId): array
+    /**
+     * @param array<int,int>|null $postedPositions positions from the admin "Products in Category" grid.
+     *        While ShelfSense is active that grid shows and edits the Standard order, so these
+     *        are saved as the new Standard order before sorting (or restoring).
+     */
+    public function applyCategory(int $categoryId, ?array $postedPositions = null): array
     {
         $settings = $this->getManagedCategories([$categoryId])[$categoryId] ?? null;
-        return $settings === null ? [] : $this->applySettings($categoryId, $settings);
+        if ($settings === null) {
+            return [];
+        }
+        if ($postedPositions !== null
+            && $this->config->isEnabled()
+            && (in_array($settings['mode'], SortMode::activeModes(), true) || $this->positions->hasBackup($categoryId))
+        ) {
+            $this->positions->captureBaseline($categoryId, $postedPositions);
+        }
+        return $this->applySettings($categoryId, $settings);
     }
 
     /**

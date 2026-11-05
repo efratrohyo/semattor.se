@@ -133,9 +133,11 @@ bin/magento shelfsense:apply
 - If a customer chooses a price sort themselves, the customer's choice wins.
 - Categories that also show products from sub-categories: only products placed **directly**
   in the category get new positions.
-- To change your own order in a category that uses ShelfSense: first set it to *Standard*
-  and save, change the order, then choose the option again. Otherwise ShelfSense overwrites
-  your changes at the next update.
+- **Change the Standard order any time:** while another option than Standard is active,
+  "Products in Category" shows your **Standard** position numbers (not the ShelfSense order).
+  Change them and save as usual. Customers keep seeing the ShelfSense order. Your changes
+  show on the shop when you go back to Standard. "Most relevant" also uses them right away
+  (25% of the score).
 - Position numbers are global in Magento, so the option applies to all countries.
   Sales from all countries count together.
 - To uninstall: set all categories back to *Standard* and save (this restores the order)

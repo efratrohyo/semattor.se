@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Admin only: "Products in Category" edits the Standard order while ShelfSense is active. -->
+    <type name="Magento\Catalog\Model\Category">
+        <plugin name="semattor_shelfsense_standard_positions" type="Semattor\ShelfSense\Plugin\StandardPositionsInAdmin"/>
+    </type>
+    <type name="Magento\Catalog\Block\Adminhtml\Category\Tab\Product">
+        <plugin name="semattor_shelfsense_standard_positions_grid" type="Semattor\ShelfSense\Plugin\StandardPositionsInAdmin"/>
+    </type>
+</config>
