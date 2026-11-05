@@ -27,7 +27,7 @@ define(['Magento_Ui/js/form/element/select'], function (Select) {
         },
 
         cardKey: function (value) {
-            return value ? value : 'standard';
+            return value || 'standard';
         },
 
         cardTitle: function (option) {
@@ -41,11 +41,11 @@ define(['Magento_Ui/js/form/element/select'], function (Select) {
         },
 
         isSelected: function (option) {
-            return (this.value() || '') === (option.value || '');
+            return this.cardKey(this.value()) === this.cardKey(option.value);
         },
 
         choose: function (option) {
-            this.value(option.value || '');
+            this.value(option.value);
         }
     });
 });

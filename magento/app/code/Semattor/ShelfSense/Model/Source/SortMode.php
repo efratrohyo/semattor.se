@@ -10,7 +10,9 @@ use Magento\Eav\Model\Entity\Attribute\Source\AbstractSource;
  */
 class SortMode extends AbstractSource
 {
-    public const STANDARD = '';
+    // Not empty: Magento's select component hides an option with an empty value.
+    // Empty / NULL (categories never saved with ShelfSense) also means Standard.
+    public const STANDARD = 'standard';
     public const NEWEST = 'newest';
     public const SMART = 'smart';
     public const BESTSELLER = 'bestseller';

@@ -101,7 +101,7 @@ define(['uiComponent', 'jquery', 'underscore', 'mage/translate'], function (Comp
             if (!value) {
                 return $t('Not sorted yet. Click Save to apply.');
             }
-            return $t('Last updated: %1').replace('%1', new Date(value.replace(' ', 'T') + 'Z').toLocaleString());
+            return $t('Last sorted: %1 (sorts when you save and every night at 03:15)').replace('%1', new Date(value.replace(' ', 'T') + 'Z').toLocaleString());
         },
 
         soldText: function (item) {
