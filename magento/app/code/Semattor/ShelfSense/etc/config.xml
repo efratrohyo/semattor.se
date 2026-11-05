@@ -11,6 +11,15 @@
             <bestseller>
                 <days>90</days>
             </bestseller>
+            <auto>
+                <tracking>1</tracking>
+                <min_days>14</min_days>
+                <min_views>2000</min_views>
+                <exploration>15</exploration>
+                <window_days>28</window_days>
+                <min_product_views>30</min_product_views>
+                <cron_expr>20 * * * *</cron_expr>
+            </auto>
             <smart>
                 <weight_sales>50</weight_sales>
                 <weight_new>25</weight_new>

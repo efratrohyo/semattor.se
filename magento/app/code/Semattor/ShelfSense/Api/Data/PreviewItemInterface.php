@@ -57,4 +57,14 @@ interface PreviewItemInterface
      * @return float|null Score 0-1, only for mode "smart"
      */
     public function getScore(): ?float;
+
+    /**
+     * @return int Times seen in this category list (Auto learning window)
+     */
+    public function getViews(): int;
+
+    /**
+     * @return int Times clicked in this category list (Auto learning window)
+     */
+    public function getClicks(): int;
 }

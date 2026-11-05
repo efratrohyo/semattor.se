@@ -20,5 +20,22 @@
             "PRIMARY": true,
             "SEMATTOR_SHELFSENSE_STATE_CATEGORY_ID_CAT_CTGR_ENTT_ENTT_ID": true
         }
+    },
+    "semattor_shelfsense_stats": {
+        "column": {
+            "stat_date": true,
+            "store_id": true,
+            "category_id": true,
+            "product_id": true,
+            "views": true,
+            "clicks": true
+        },
+        "index": {
+            "SEMATTOR_SHELFSENSE_STATS_CATEGORY_ID_STAT_DATE": true,
+            "SEMATTOR_SHELFSENSE_STATS_PRODUCT_ID_STAT_DATE": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
     }
 }

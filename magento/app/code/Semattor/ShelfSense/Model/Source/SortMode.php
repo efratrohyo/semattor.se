@@ -16,6 +16,7 @@ class SortMode extends AbstractSource
     public const NEWEST = 'newest';
     public const SMART = 'smart';
     public const BESTSELLER = 'bestseller';
+    public const AUTO = 'auto';
 
     public function getAllOptions(): array
     {
@@ -25,6 +26,7 @@ class SortMode extends AbstractSource
                 ['value' => self::NEWEST, 'label' => __('Newest first')],
                 ['value' => self::SMART, 'label' => __('Most relevant (smart)')],
                 ['value' => self::BESTSELLER, 'label' => __('Best sellers')],
+                ['value' => self::AUTO, 'label' => __('Auto (learning)')],
             ];
         }
         return $this->_options;
@@ -35,6 +37,6 @@ class SortMode extends AbstractSource
      */
     public static function activeModes(): array
     {
-        return [self::NEWEST, self::SMART, self::BESTSELLER];
+        return [self::NEWEST, self::SMART, self::BESTSELLER, self::AUTO];
     }
 }

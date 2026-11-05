@@ -12,6 +12,8 @@ class RankedItem
     public bool $pinned = false;
     public int $pinIndex = PHP_INT_MAX;
     public string $name = '';
+    public int $views = 0;
+    public int $clicks = 0;
 
     public function __construct(
         public readonly int $productId,

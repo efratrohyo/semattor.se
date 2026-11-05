@@ -27,6 +27,10 @@ interface SettingsManagementInterface
      * @param int|null $weightNew
      * @param int|null $weightManual
      * @param string|null $schedule
+     * @param bool|null $trackingEnabled
+     * @param int|null $autoMinDays
+     * @param int|null $autoMinViews
+     * @param int|null $autoExploration
      * @return \Semattor\ShelfSense\Api\Data\SettingsInterface
      * @throws \Magento\Framework\Exception\InputException
      */
@@ -40,6 +44,10 @@ interface SettingsManagementInterface
         ?int $weightSales = null,
         ?int $weightNew = null,
         ?int $weightManual = null,
-        ?string $schedule = null
+        ?string $schedule = null,
+        ?bool $trackingEnabled = null,
+        ?int $autoMinDays = null,
+        ?int $autoMinViews = null,
+        ?int $autoExploration = null
     ): \Semattor\ShelfSense\Api\Data\SettingsInterface;
 }

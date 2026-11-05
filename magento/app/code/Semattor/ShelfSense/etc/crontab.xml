@@ -4,5 +4,8 @@
         <job name="semattor_shelfsense_apply_all" instance="Semattor\ShelfSense\Cron\ApplyAll" method="execute">
             <config_path>semattor_shelfsense/general/cron_expr</config_path>
         </job>
+        <job name="semattor_shelfsense_auto" instance="Semattor\ShelfSense\Cron\ApplyAuto" method="execute">
+            <config_path>semattor_shelfsense/auto/cron_expr</config_path>
+        </job>
     </group>
 </config>

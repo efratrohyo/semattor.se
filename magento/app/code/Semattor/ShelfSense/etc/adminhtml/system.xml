@@ -33,6 +33,41 @@
                     <validate>validate-digits validate-greater-than-zero</validate>
                 </field>
             </group>
+            <group id="auto" translate="label comment" sortOrder="25" showInDefault="1">
+                <label>Auto (learning)</label>
+                <comment>Auto learns from what customers see, click and buy in each category, and tests new products in a few places. It can be chosen on a category when enough data is collected.</comment>
+                <field id="tracking" translate="label comment" type="select" sortOrder="10" showInDefault="1">
+                    <label>Collect views and clicks</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Counts which products customers see and click in category lists. No personal data is stored, only numbers per day.</comment>
+                </field>
+                <field id="min_days" translate="label" type="text" sortOrder="20" showInDefault="1">
+                    <label>Days of data needed before Auto can be chosen</label>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                </field>
+                <field id="min_views" translate="label" type="text" sortOrder="30" showInDefault="1">
+                    <label>Product views needed before Auto can be chosen</label>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                </field>
+                <field id="exploration" translate="label comment" type="text" sortOrder="40" showInDefault="1">
+                    <label>Testing share (%)</label>
+                    <comment>Share of the top places used to test products Auto knows little about. Default 15.</comment>
+                    <validate>validate-digits validate-digits-range digits-range-0-50</validate>
+                </field>
+                <field id="window_days" translate="label" type="text" sortOrder="50" showInDefault="1">
+                    <label>Learn from the last X days</label>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                </field>
+                <field id="min_product_views" translate="label comment" type="text" sortOrder="60" showInDefault="1">
+                    <label>Views before a product counts as known</label>
+                    <comment>Products with fewer views are tested in the testing places.</comment>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                </field>
+                <field id="cron_expr" translate="label comment" type="text" sortOrder="70" showInDefault="1">
+                    <label>When Auto re-sorts (cron)</label>
+                    <comment>Default: 20 * * * * (every hour).</comment>
+                </field>
+            </group>
             <group id="smart" translate="label comment" sortOrder="30" showInDefault="1">
                 <label>Most relevant (smart)</label>
                 <comment>Score = sales (recent sales count double) + new product boost + your own position numbers. The weights are relative to each other, for example 50 / 25 / 25.</comment>

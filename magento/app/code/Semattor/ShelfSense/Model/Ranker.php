@@ -19,7 +19,8 @@ class Ranker
     public function __construct(
         private readonly ResourceConnection $resource,
         private readonly ProductCollectionFactory $productCollectionFactory,
-        private readonly Config $config
+        private readonly Config $config,
+        private readonly Learning $learning
     ) {
     }
 
@@ -28,7 +29,7 @@ class Ranker
      * @param string[] $pinnedSkus
      * @return RankedItem[] in final order
      */
-    public function rank(string $mode, array $baseline, array $pinnedSkus = []): array
+    public function rank(string $mode, array $baseline, array $pinnedSkus = [], int $categoryId = 0): array
     {
         if ($baseline === []) {
             return [];
@@ -49,6 +50,9 @@ class Ranker
 
         if ($mode === SortMode::SMART) {
             $this->scoreSmart($items);
+        }
+        if ($mode === SortMode::AUTO) {
+            $this->learning->score($categoryId, $items);
         }
 
         $strategy = $this->comparator($mode);
@@ -102,7 +106,7 @@ class Ranker
                 $b->qtySold <=> $a->qtySold
                 ?: $b->qtyTrend <=> $a->qtyTrend
                 ?: $b->productId <=> $a->productId,
-            SortMode::SMART => static fn (RankedItem $a, RankedItem $b): int =>
+            SortMode::SMART, SortMode::AUTO => static fn (RankedItem $a, RankedItem $b): int =>
                 $b->score <=> $a->score,
             default => static fn (): int => 0,
         };

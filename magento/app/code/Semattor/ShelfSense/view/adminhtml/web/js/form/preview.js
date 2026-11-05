@@ -17,6 +17,8 @@ define(['uiComponent', 'jquery', 'underscore', 'mage/translate'], function (Comp
             total: 0,
             notInCategory: [],
             lastUpdated: null,
+            autoStatus: null,
+            usedMode: '',
             listens: {
                 mode: 'schedule',
                 pinned: 'schedule',
@@ -25,7 +27,7 @@ define(['uiComponent', 'jquery', 'underscore', 'mage/translate'], function (Comp
         },
 
         initObservable: function () {
-            this._super().observe(['mode', 'pinned', 'loading', 'error', 'items', 'total', 'notInCategory', 'lastUpdated']);
+            this._super().observe(['mode', 'pinned', 'loading', 'error', 'items', 'total', 'notInCategory', 'lastUpdated', 'autoStatus', 'usedMode']);
             this.schedule = _.debounce(this.load.bind(this), 400);
             return this;
         },
@@ -71,6 +73,8 @@ define(['uiComponent', 'jquery', 'underscore', 'mage/translate'], function (Comp
                 self.total(data.total || 0);
                 self.notInCategory(data.notInCategory || []);
                 self.lastUpdated(data.lastUpdated || null);
+                self.autoStatus(data.auto || null);
+                self.usedMode(data.usedMode || '');
             }).fail(function () {
                 self.error($t('Could not load the preview. Try again.'));
             }).always(function () {
@@ -79,7 +83,22 @@ define(['uiComponent', 'jquery', 'underscore', 'mage/translate'], function (Comp
         },
 
         isActive: function () {
-            return ['newest', 'smart', 'bestseller'].indexOf(this.mode()) !== -1;
+            return ['newest', 'smart', 'bestseller', 'auto'].indexOf(this.mode()) !== -1;
+        },
+
+        autoNote: function () {
+            if (this.mode() === 'auto' && this.usedMode() === 'smart') {
+                return $t('Auto does not have enough data yet, so Most relevant is used until it has.');
+            }
+            return '';
+        },
+
+        showViews: function () {
+            return this.mode() === 'auto';
+        },
+
+        viewsText: function (item) {
+            return $t('%1 views · %2 clicks').replace('%1', item.views).replace('%2', item.clicks);
         },
 
         heading: function () {

@@ -31,6 +31,36 @@ class Config
         return max(0, $this->int('general/top_count', 300));
     }
 
+    public function isTrackingEnabled(): bool
+    {
+        return $this->scopeConfig->isSetFlag(self::PREFIX . 'auto/tracking');
+    }
+
+    public function getAutoMinDays(): int
+    {
+        return max(1, $this->int('auto/min_days', 14));
+    }
+
+    public function getAutoMinViews(): int
+    {
+        return max(1, $this->int('auto/min_views', 2000));
+    }
+
+    public function getAutoExploration(): int
+    {
+        return min(50, max(0, $this->int('auto/exploration', 15)));
+    }
+
+    public function getAutoWindowDays(): int
+    {
+        return max(1, $this->int('auto/window_days', 28));
+    }
+
+    public function getAutoMinProductViews(): int
+    {
+        return max(1, $this->int('auto/min_product_views', 30));
+    }
+
     public function getBestsellerDays(): int
     {
         return max(1, $this->int('bestseller/days', 90));

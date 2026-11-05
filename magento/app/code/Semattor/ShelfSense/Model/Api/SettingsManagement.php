@@ -36,7 +36,11 @@ class SettingsManagement implements SettingsManagementInterface
             (int)$v('smart/weight_sales'),
             (int)$v('smart/weight_new'),
             (int)$v('smart/weight_manual'),
-            (string)$v('general/cron_expr')
+            (string)$v('general/cron_expr'),
+            (bool)$v('auto/tracking'),
+            (int)$v('auto/min_days'),
+            (int)$v('auto/min_views'),
+            (int)$v('auto/exploration')
         );
     }
 
@@ -50,7 +54,11 @@ class SettingsManagement implements SettingsManagementInterface
         ?int $weightSales = null,
         ?int $weightNew = null,
         ?int $weightManual = null,
-        ?string $schedule = null
+        ?string $schedule = null,
+        ?bool $trackingEnabled = null,
+        ?int $autoMinDays = null,
+        ?int $autoMinViews = null,
+        ?int $autoExploration = null
     ): SettingsInterface {
         $changes = [];
         $bool = static fn (?bool $b) => $b === null ? null : ($b ? '1' : '0');
@@ -73,6 +81,13 @@ class SettingsManagement implements SettingsManagementInterface
         $changes['smart/weight_sales'] = $positive($weightSales, 'weightSales', 0);
         $changes['smart/weight_new'] = $positive($weightNew, 'weightNew', 0);
         $changes['smart/weight_manual'] = $positive($weightManual, 'weightManual', 0);
+        $changes['auto/tracking'] = $bool($trackingEnabled);
+        $changes['auto/min_days'] = $positive($autoMinDays, 'autoMinDays', 1);
+        $changes['auto/min_views'] = $positive($autoMinViews, 'autoMinViews', 1);
+        if ($autoExploration !== null && ($autoExploration < 0 || $autoExploration > 50)) {
+            throw new InputException(__('autoExploration must be between 0 and 50.'));
+        }
+        $changes['auto/exploration'] = $autoExploration === null ? null : (string)$autoExploration;
         if ($schedule !== null) {
             if (count(preg_split('/\s+/', trim($schedule))) !== 5) {
                 throw new InputException(__('schedule must be a cron expression with 5 parts, e.g. "15 3 * * *".'));

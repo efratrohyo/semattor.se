@@ -35,8 +35,42 @@ class Applier
         private readonly CacheContext $cacheContext,
         private readonly EventManager $eventManager,
         private readonly CacheInterface $cache,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly Learning $learning
     ) {
+    }
+
+    /**
+     * Auto falls back to Most relevant until the category has enough data.
+     */
+    public function effectiveMode(int $categoryId, string $mode): string
+    {
+        if ($mode === SortMode::AUTO && !$this->learning->getReadiness($categoryId)['ready']) {
+            return SortMode::SMART;
+        }
+        return $mode;
+    }
+
+    /**
+     * @return array{ready: bool, days: int, needDays: int, views: int, needViews: int}
+     */
+    public function autoReadiness(int $categoryId): array
+    {
+        return $this->learning->getReadiness($categoryId);
+    }
+
+    /**
+     * Re-sort only the categories that use Auto (hourly).
+     */
+    public function applyAuto(): array
+    {
+        $ids = [];
+        foreach ($this->getManagedCategories() as $id => $settings) {
+            if ($settings['mode'] === SortMode::AUTO) {
+                $ids[] = $id;
+            }
+        }
+        return $ids ? $this->applyAll($ids) : [];
     }
 
     /**
@@ -124,9 +158,10 @@ class Applier
             return [];
         }
         return $this->ranker->rank(
-            $settings['mode'],
+            $this->effectiveMode($categoryId, $settings['mode']),
             $this->positions->getBaseline($categoryId),
-            $settings['pinned']
+            $settings['pinned'],
+            $categoryId
         );
     }
 
@@ -139,10 +174,12 @@ class Applier
     {
         $baseline = $this->positions->getBaseline($categoryId);
         $active = in_array($mode, SortMode::activeModes(), true);
+        $readiness = $this->learning->getReadiness($categoryId);
+        $mode = $this->effectiveMode($categoryId, $mode);
         $pinned = $active ? $this->parseSkus($pinnedRaw) : [];
 
         $items = $active
-            ? $this->ranker->rank($mode, $baseline, $pinned)
+            ? $this->ranker->rank($mode, $baseline, $pinned, $categoryId)
             : $this->ranker->currentOrder($baseline);
 
         $inCategory = [];
@@ -167,6 +204,8 @@ class Applier
                 'soldOut' => !$item->sellable,
                 'pinned' => $item->pinned,
                 'score' => $mode === SortMode::SMART ? round($item->score, 2) : null,
+                'views' => $item->views,
+                'clicks' => $item->clicks,
             ];
         }
 
@@ -175,6 +214,8 @@ class Applier
             'items' => $rows,
             'notInCategory' => $notInCategory,
             'lastUpdated' => $this->positions->getLastUpdated($categoryId),
+            'auto' => $readiness,
+            'usedMode' => $active ? $mode : SortMode::STANDARD,
         ];
     }
 
@@ -187,7 +228,12 @@ class Applier
         $mode = $settings['mode'];
         if (in_array($mode, SortMode::activeModes(), true)) {
             $this->positions->backupMissing($categoryId);
-            $ranked = $this->ranker->rank($mode, $this->positions->getBaseline($categoryId), $settings['pinned']);
+            $ranked = $this->ranker->rank(
+                $this->effectiveMode($categoryId, $mode),
+                $this->positions->getBaseline($categoryId),
+                $settings['pinned'],
+                $categoryId
+            );
             $changed = $this->positions->write($categoryId, $this->targetPositions($ranked));
             $this->positions->markUpdated($categoryId, count($changed));
             $action = 'sorted';

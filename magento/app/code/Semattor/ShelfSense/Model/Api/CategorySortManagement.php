@@ -17,7 +17,7 @@ use Semattor\ShelfSense\Setup\Patch\Data\AddCategoryAttributes as Attr;
 
 class CategorySortManagement implements CategorySortManagementInterface
 {
-    private const MODES = [SortMode::STANDARD, SortMode::NEWEST, SortMode::SMART, SortMode::BESTSELLER];
+    private const MODES = [SortMode::STANDARD, SortMode::NEWEST, SortMode::SMART, SortMode::BESTSELLER, SortMode::AUTO];
 
     public function __construct(
         private readonly Applier $applier,
@@ -84,7 +84,16 @@ class CategorySortManagement implements CategorySortManagementInterface
     public function save(int $categoryId, string $mode, ?string $pinnedSkus = null): CategoryStatusInterface
     {
         $mode = $this->validMode($mode);
-        $this->settings($categoryId); // 404 if missing
+        $current = $this->settings($categoryId); // 404 if missing
+        if ($mode === SortMode::AUTO && $current['mode'] !== SortMode::AUTO) {
+            $readiness = $this->applier->autoReadiness($categoryId);
+            if (!$readiness['ready']) {
+                throw new InputException(__(
+                    'Auto is not available for this category yet. Collected: %1.',
+                    $this->progress($readiness)
+                ));
+            }
+        }
 
         // Save only these two attributes (global, store 0). No full category save,
         // so URL keys, products and other fields are never touched.
@@ -171,10 +180,15 @@ class CategorySortManagement implements CategorySortManagementInterface
                 (bool)$row['soldOut'],
                 (bool)$row['pinned'],
                 (bool)$row['isNew'],
-                $row['score'] === null ? null : (float)$row['score']
+                $row['score'] === null ? null : (float)$row['score'],
+                (int)($row['views'] ?? 0),
+                (int)($row['clicks'] ?? 0)
             );
         }
         $mode = $mode ?: SortMode::STANDARD;
+        if ($mode === SortMode::AUTO && ($data['usedMode'] ?? '') === SortMode::SMART) {
+            $message = trim($message . ' Auto does not have enough data yet, so Most relevant is used until it has.');
+        }
         return new CategoryStatus(
             $categoryId,
             (string)$settings['name'],
@@ -184,7 +198,20 @@ class CategorySortManagement implements CategorySortManagementInterface
             (int)$data['total'],
             $data['notInCategory'],
             $items,
-            $message
+            $message,
+            (bool)$data['auto']['ready'],
+            $this->progress($data['auto'])
+        );
+    }
+
+    private function progress(array $r): string
+    {
+        return sprintf(
+            '%d of %d days, %d of %d product views',
+            min($r['days'], $r['needDays']),
+            $r['needDays'],
+            min($r['views'], $r['needViews']),
+            $r['needViews']
         );
     }
 }

@@ -57,4 +57,24 @@ interface SettingsInterface
      * @return string Cron expression for the automatic re-sort
      */
     public function getSchedule(): string;
+
+    /**
+     * @return bool Collect list views and clicks (needed for Auto)
+     */
+    public function getTrackingEnabled(): bool;
+
+    /**
+     * @return int Days of data needed before Auto can be chosen
+     */
+    public function getAutoMinDays(): int;
+
+    /**
+     * @return int Product views needed before Auto can be chosen
+     */
+    public function getAutoMinViews(): int;
+
+    /**
+     * @return int Share of top places used for testing (%)
+     */
+    public function getAutoExploration(): int;
 }

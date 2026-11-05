@@ -20,7 +20,9 @@ class CategoryStatus implements CategoryStatusInterface
         private readonly int $totalProducts = 0,
         private readonly array $notInCategory = [],
         private readonly array $preview = [],
-        private string $message = ''
+        private string $message = '',
+        private readonly bool $autoReady = false,
+        private readonly string $autoProgress = ''
     ) {
     }
 
@@ -33,6 +35,8 @@ class CategoryStatus implements CategoryStatusInterface
     public function getNotInCategory(): array { return $this->notInCategory; }
     public function getPreview(): array { return $this->preview; }
     public function getMessage(): string { return $this->message; }
+    public function getAutoReady(): bool { return $this->autoReady; }
+    public function getAutoProgress(): string { return $this->autoProgress; }
 
     public function withMessage(string $message): self
     {

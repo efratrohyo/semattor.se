@@ -4,6 +4,9 @@
         <span class="shelfsense-preview__meta" text="updatedText()"></span>
     </div>
 
+    <div class="message message-notice" if="autoNote()">
+        <div text="autoNote()"></div>
+    </div>
     <div class="message message-warning" if="notInCategory().length">
         <div text="missingText()"></div>
     </div>
@@ -22,6 +25,7 @@
                     <span class="shelfsense-tag is-pinned" if="item.pinned" translate="'Pinned'"></span>
                     <span class="shelfsense-tag is-new" if="item.isNew" translate="'New'"></span>
                     <span class="shelfsense-tag is-soldout" if="item.soldOut" translate="'Sold out'"></span>
+                    <span class="shelfsense-tag" if="$parent.showViews()" text="$parent.viewsText(item)"></span>
                     <span class="shelfsense-tag" text="$parent.soldText(item)"></span>
                 </span>
             </li>

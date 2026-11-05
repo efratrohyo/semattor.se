@@ -26,4 +26,27 @@
                     table="semattor_shelfsense_state" column="category_id"
                     referenceTable="catalog_category_entity" referenceColumn="entity_id" onDelete="CASCADE"/>
     </table>
+    <!-- Auto (learning): how often each product was seen and clicked in a category list, per day. -->
+    <table name="semattor_shelfsense_stats" resource="default" engine="innodb" comment="ShelfSense list views and clicks per day">
+        <column xsi:type="date" name="stat_date" nullable="false" comment="Day"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" comment="Store view"/>
+        <column xsi:type="int" name="category_id" unsigned="true" nullable="false" comment="Category ID"/>
+        <column xsi:type="int" name="product_id" unsigned="true" nullable="false" comment="Product ID"/>
+        <column xsi:type="int" name="views" unsigned="true" nullable="false" default="0" comment="Seen in the list"/>
+        <column xsi:type="int" name="clicks" unsigned="true" nullable="false" default="0" comment="Clicked in the list"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="stat_date"/>
+            <column name="store_id"/>
+            <column name="category_id"/>
+            <column name="product_id"/>
+        </constraint>
+        <index referenceId="SEMATTOR_SHELFSENSE_STATS_CATEGORY_ID_STAT_DATE" indexType="btree">
+            <column name="category_id"/>
+            <column name="stat_date"/>
+        </index>
+        <index referenceId="SEMATTOR_SHELFSENSE_STATS_PRODUCT_ID_STAT_DATE" indexType="btree">
+            <column name="product_id"/>
+            <column name="stat_date"/>
+        </index>
+    </table>
 </schema>

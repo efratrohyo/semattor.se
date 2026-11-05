@@ -1,0 +1,72 @@
+<?php
+/**
+ * ShelfSense Sorting – counts which products are seen and clicked in this category list.
+ * Plain JavaScript (works with Breeze and Luma, no RequireJS). Sends small batches with
+ * navigator.sendBeacon. No cookies, no personal data.
+ *
+ * @var \Semattor\ShelfSense\Block\Tracker $block
+ * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
+ */
+$config = json_encode([
+    'url' => $block->getCollectUrl(),
+    'c' => $block->getCategoryId(),
+], JSON_UNESCAPED_SLASHES);
+$script = <<<JS
+(function (cfg) {
+    if (!cfg.c || !('IntersectionObserver' in window) || !navigator.sendBeacon) { return; }
+    var seen = {}, clicked = {}, queueV = [], queueK = [], timer = null;
+
+    function productId(item) {
+        var el = item.querySelector('[data-product-id]');
+        if (el) { return parseInt(el.getAttribute('data-product-id'), 10) || 0; }
+        el = item.querySelector('input[name="product"]');
+        return el ? (parseInt(el.value, 10) || 0) : 0;
+    }
+    function flush() {
+        timer = null;
+        if (!queueV.length && !queueK.length) { return; }
+        var body = JSON.stringify({ c: cfg.c, v: queueV.splice(0, 200), k: queueK.splice(0, 200) });
+        try { navigator.sendBeacon(cfg.url, new Blob([body], { type: 'text/plain' })); } catch (e) {}
+    }
+    function later() { if (!timer) { timer = setTimeout(flush, 4000); } }
+
+    var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (!entry.isIntersecting) { return; }
+            var id = productId(entry.target);
+            observer.unobserve(entry.target);
+            if (id && !seen[id]) { seen[id] = 1; queueV.push(id); later(); }
+        });
+    }, { threshold: 0.5 });
+
+    function watch(root) {
+        (root || document).querySelectorAll('.products .product-item').forEach(function (item) {
+            if (item.getAttribute('data-shelfsense')) { return; }
+            item.setAttribute('data-shelfsense', '1');
+            observer.observe(item);
+        });
+    }
+
+    document.addEventListener('click', function (event) {
+        var link = event.target.closest && event.target.closest('.products .product-item a');
+        if (!link) { return; }
+        var id = productId(link.closest('.product-item'));
+        if (id && !clicked[id]) { clicked[id] = 1; queueK.push(id); flush(); }
+    }, true);
+    document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'hidden') { flush(); }
+    });
+    window.addEventListener('pagehide', flush);
+
+    watch();
+    // Ajax layered navigation / infinite scroll: watch new product items too.
+    if ('MutationObserver' in window) {
+        var pending = null;
+        new MutationObserver(function () {
+            if (!pending) { pending = setTimeout(function () { pending = null; watch(); }, 500); }
+        }).observe(document.body, { childList: true, subtree: true });
+    }
+})($config);
+JS;
+?>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $script, false) ?>

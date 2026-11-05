@@ -12,6 +12,9 @@
                     <item name="source" xsi:type="string">category</item>
                     <item name="component" xsi:type="string">Semattor_ShelfSense/js/form/mode-cards</item>
                     <item name="elementTmpl" xsi:type="string">Semattor_ShelfSense/form/mode-cards</item>
+                    <item name="imports" xsi:type="array">
+                        <item name="autoStatus" xsi:type="string">${ $.parentName }.shelfsense_preview:autoStatus</item>
+                    </item>
                     <item name="cards" xsi:type="array">
                         <item name="standard" xsi:type="array">
                             <item name="title" xsi:type="string" translate="true">Standard</item>
@@ -24,6 +27,10 @@
                         <item name="smart" xsi:type="array">
                             <item name="title" xsi:type="string" translate="true">Most relevant</item>
                             <item name="text" xsi:type="string" translate="true">A mix: 50% sales, 25% new products, 25% your position numbers. Best sellers on top, but new products and your choices still get a chance.</item>
+                        </item>
+                        <item name="auto" xsi:type="array">
+                            <item name="title" xsi:type="string" translate="true">Auto (learning)</item>
+                            <item name="text" xsi:type="string" translate="true">Learns from what customers see, click and buy here. Tests products it knows little about in a few places and moves up what sells. Re-sorts every hour.</item>
                         </item>
                         <item name="bestseller" xsi:type="array">
                             <item name="title" xsi:type="string" translate="true">Best sellers</item>

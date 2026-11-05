@@ -30,6 +30,10 @@
 }
 .shelfsense-card.is-selected .shelfsense-card__dot { border: 5px solid #007bdb; }
 .shelfsense-card__title { font-weight: 600; font-size: 14px; }
+.shelfsense-card.is-locked { cursor: not-allowed; background: #f8f8f8; }
+.shelfsense-card.is-locked:hover { border-color: #c2c2c2; }
+.shelfsense-card.is-locked .shelfsense-card__title, .shelfsense-card.is-locked .shelfsense-card__text { opacity: .6; }
+.shelfsense-card__lock { grid-column: 2; font-size: 12px; color: #8a5a00; background: #fdf3dc; border-radius: 4px; padding: 4px 6px; margin-top: 4px; }
 .shelfsense-card__text { grid-column: 2; font-size: 12.5px; line-height: 1.45; color: #666; }
 
 .shelfsense-preview {

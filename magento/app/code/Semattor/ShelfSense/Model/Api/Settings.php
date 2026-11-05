@@ -17,7 +17,11 @@ class Settings implements SettingsInterface
         private readonly int $weightSales,
         private readonly int $weightNew,
         private readonly int $weightManual,
-        private readonly string $schedule
+        private readonly string $schedule,
+        private readonly bool $trackingEnabled,
+        private readonly int $autoMinDays,
+        private readonly int $autoMinViews,
+        private readonly int $autoExploration
     ) {
     }
 
@@ -31,4 +35,8 @@ class Settings implements SettingsInterface
     public function getWeightNew(): int { return $this->weightNew; }
     public function getWeightManual(): int { return $this->weightManual; }
     public function getSchedule(): string { return $this->schedule; }
+    public function getTrackingEnabled(): bool { return $this->trackingEnabled; }
+    public function getAutoMinDays(): int { return $this->autoMinDays; }
+    public function getAutoMinViews(): int { return $this->autoMinViews; }
+    public function getAutoExploration(): int { return $this->autoExploration; }
 }

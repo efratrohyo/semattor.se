@@ -12,7 +12,8 @@ class ApplyAll
     public function __construct(
         private readonly Applier $applier,
         private readonly Config $config,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly \Semattor\ShelfSense\Model\Learning $learning
     ) {
     }
 
@@ -21,6 +22,8 @@ class ApplyAll
         if (!$this->config->isEnabled()) {
             return;
         }
+        // Keep 120 days of view/click statistics.
+        $this->learning->purgeOlderThan(120);
         foreach ($this->applier->applyAll() as $categoryId => $row) {
             $this->logger->info(sprintf(
                 'ShelfSense: category %d (%s) mode=%s -> %s, %d positions changed',

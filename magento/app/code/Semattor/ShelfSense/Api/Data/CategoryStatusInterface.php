@@ -49,6 +49,16 @@ interface CategoryStatusInterface
     public function getPreview(): array;
 
     /**
+     * @return bool Auto (learning) has enough data for this category
+     */
+    public function getAutoReady(): bool;
+
+    /**
+     * @return string Data collected for Auto, e.g. "9 of 14 days, 1 240 of 2 000 product views"
+     */
+    public function getAutoProgress(): string;
+
+    /**
      * @return string What happened, in plain English
      */
     public function getMessage(): string;

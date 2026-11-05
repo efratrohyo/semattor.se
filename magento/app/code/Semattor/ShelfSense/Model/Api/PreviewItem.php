@@ -17,7 +17,9 @@ class PreviewItem implements PreviewItemInterface
         private readonly bool $soldOut,
         private readonly bool $pinned,
         private readonly bool $isNew,
-        private readonly ?float $score
+        private readonly ?float $score,
+        private readonly int $views = 0,
+        private readonly int $clicks = 0
     ) {
     }
 
@@ -31,4 +33,6 @@ class PreviewItem implements PreviewItemInterface
     public function getPinned(): bool { return $this->pinned; }
     public function getIsNew(): bool { return $this->isNew; }
     public function getScore(): ?float { return $this->score; }
+    public function getViews(): int { return $this->views; }
+    public function getClicks(): int { return $this->clicks; }
 }

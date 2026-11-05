@@ -3,13 +3,15 @@
         <button type="button"
                 class="shelfsense-card"
                 role="radio"
-                css="'is-selected': $parent.isSelected(option)"
+                css="'is-selected': $parent.isSelected(option), 'is-locked': $parent.isLocked(option)"
                 attr="'aria-checked': $parent.isSelected(option) ? 'true' : 'false'"
                 click="$parent.choose.bind($parent, option)"
+                attr="'aria-disabled': $parent.isLocked(option) ? 'true' : 'false'"
                 disable="$parent.disabled">
             <span class="shelfsense-card__dot" aria-hidden="true"></span>
             <span class="shelfsense-card__title" text="$parent.cardTitle(option)"></span>
             <span class="shelfsense-card__text" text="$parent.cardText(option)"></span>
+            <span class="shelfsense-card__lock" if="$parent.isLocked(option)" text="$parent.lockText(option)"></span>
         </button>
     </each>
 </div>
