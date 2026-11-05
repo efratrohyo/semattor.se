@@ -5,7 +5,7 @@ Customers never see the name of the option. They only see the new order.
 
 | Option | What happens |
 |---|---|
-| **Standard** *(default)* | Same as today. Products follow their position numbers, lowest first (-8, -5, -1, 0 …). ShelfSense does not touch the category. |
+| **Standard** *(default)* | Products follow their position numbers, lowest first (-8, -5, -1, 0 …). ShelfSense does not touch the category. |
 | **Newest first** | The product added last comes first (highest product ID first). |
 | **Most relevant (smart)** | Each product gets a score: 50% sales, 25% how new it is, 25% your own position numbers. Highest score first. See below. |
 | **Best sellers** | Most units sold in the last 90 days first. If equal: most sold in the last 30 days, then highest product ID. |

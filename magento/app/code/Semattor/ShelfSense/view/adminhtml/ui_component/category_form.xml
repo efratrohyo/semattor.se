@@ -15,7 +15,7 @@
                     <item name="cards" xsi:type="array">
                         <item name="standard" xsi:type="array">
                             <item name="title" xsi:type="string" translate="true">Standard</item>
-                            <item name="text" xsi:type="string" translate="true">Same as today. Lowest position number first. ShelfSense does not touch this category.</item>
+                            <item name="text" xsi:type="string" translate="true">Lowest position number first. ShelfSense does not touch this category.</item>
                         </item>
                         <item name="newest" xsi:type="array">
                             <item name="title" xsi:type="string" translate="true">Newest first</item>
