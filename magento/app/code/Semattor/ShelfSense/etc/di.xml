@@ -1,5 +1,10 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Semattor\ShelfSense\Api\CategorySortManagementInterface" type="Semattor\ShelfSense\Model\Api\CategorySortManagement"/>
+    <preference for="Semattor\ShelfSense\Api\SettingsManagementInterface" type="Semattor\ShelfSense\Model\Api\SettingsManagement"/>
+    <preference for="Semattor\ShelfSense\Api\Data\CategoryStatusInterface" type="Semattor\ShelfSense\Model\Api\CategoryStatus"/>
+    <preference for="Semattor\ShelfSense\Api\Data\PreviewItemInterface" type="Semattor\ShelfSense\Model\Api\PreviewItem"/>
+    <preference for="Semattor\ShelfSense\Api\Data\SettingsInterface" type="Semattor\ShelfSense\Model\Api\Settings"/>
     <type name="Magento\Framework\Console\CommandListInterface">
         <arguments>
             <argument name="commands" xsi:type="array">

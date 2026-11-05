@@ -1,0 +1,28 @@
+- code: shelfsense_overview
+  title: ShelfSense Sorting overview
+  description: Show which categories use ShelfSense Sorting, their option and when they were last sorted.
+  content: |
+    Read the ShelfSense Sorting documentation first (docsearch: "ShelfSense Sorting").
+    Call GET /V1/shelfsense/categories and show a short table: category name, id, mode, pinned SKUs, last sorted.
+    Then suggest, in plain English, which other big categories could use another mode and why.
+    Do not change anything.
+  required_tools: builtin_system_restapi
+  is_active: true
+- code: shelfsense_set_category
+  title: ShelfSense Sorting – change a category
+  description: Preview and change the ShelfSense Sorting option of a category.
+  content: |
+    Read the ShelfSense Sorting documentation first (docsearch: "ShelfSense Sorting").
+    Category: {{category}}. Wanted option: {{mode}}.
+    1. Find the category id (GET /V1/shelfsense/categories?all=1 if a name was given).
+    2. Preview with POST /V1/shelfsense/categories/{id}/preview and show the first 12 products.
+    3. Ask for a yes, then save with PUT /V1/shelfsense/categories/{id}.
+  arguments:
+    - name: category
+      description: "Category id or name"
+      required: true
+    - name: mode
+      description: "standard, newest, smart or bestseller"
+      required: true
+  required_tools: builtin_system_restapi
+  is_active: true

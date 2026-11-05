@@ -90,6 +90,23 @@ The shop already sorts "Populärt" by position, so it shows the new order automa
 - The first time a category gets an option, the old position numbers are saved in a backup.
   If you go back to **Standard**, the old order comes back exactly.
 
+## REST API (and AI assistant through MCP)
+
+Everything can also be done through the REST API, for example by an AI assistant through the
+Magento MCP server. The MCP server reads the guide in `etc/mcp/shelfsense-sorting.md` automatically.
+
+| Method | Endpoint | What it does |
+|---|---|---|
+| GET | `/V1/shelfsense/categories` | Categories that are not Standard (`?all=1` = all categories) |
+| GET | `/V1/shelfsense/categories/{id}` | Option, pinned SKUs, last sort + first 12 products customers see |
+| POST | `/V1/shelfsense/categories/{id}/preview` | Preview an option, nothing is saved |
+| PUT | `/V1/shelfsense/categories/{id}` | Save option (+ pinned SKUs) and sort now |
+| POST | `/V1/shelfsense/categories/{id}/sort` | Sort again now |
+| GET / PUT | `/V1/shelfsense/settings` | Read / change the global settings |
+
+Permissions: category endpoints use "Catalog > Categories". Settings use "ShelfSense Sorting"
+under Stores > Configuration in the role resources.
+
 ## Performance and safety
 
 - **No conflicts by design:** no rewrites, no preferences and no plugins on Magento code.

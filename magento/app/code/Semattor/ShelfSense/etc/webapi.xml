@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <!-- Categories: needs the same permission as editing categories in admin. -->
+    <route url="/V1/shelfsense/categories" method="GET">
+        <service class="Semattor\ShelfSense\Api\CategorySortManagementInterface" method="getList"/>
+        <resources><resource ref="Magento_Catalog::categories"/></resources>
+    </route>
+    <route url="/V1/shelfsense/categories/:categoryId" method="GET">
+        <service class="Semattor\ShelfSense\Api\CategorySortManagementInterface" method="get"/>
+        <resources><resource ref="Magento_Catalog::categories"/></resources>
+    </route>
+    <route url="/V1/shelfsense/categories/:categoryId/preview" method="POST">
+        <service class="Semattor\ShelfSense\Api\CategorySortManagementInterface" method="preview"/>
+        <resources><resource ref="Magento_Catalog::categories"/></resources>
+    </route>
+    <route url="/V1/shelfsense/categories/:categoryId" method="PUT">
+        <service class="Semattor\ShelfSense\Api\CategorySortManagementInterface" method="save"/>
+        <resources><resource ref="Magento_Catalog::categories"/></resources>
+    </route>
+    <route url="/V1/shelfsense/categories/:categoryId/sort" method="POST">
+        <service class="Semattor\ShelfSense\Api\CategorySortManagementInterface" method="sortNow"/>
+        <resources><resource ref="Magento_Catalog::categories"/></resources>
+    </route>
+
+    <!-- Global settings: needs the ShelfSense Sorting configuration permission. -->
+    <route url="/V1/shelfsense/settings" method="GET">
+        <service class="Semattor\ShelfSense\Api\SettingsManagementInterface" method="get"/>
+        <resources><resource ref="Semattor_ShelfSense::config"/></resources>
+    </route>
+    <route url="/V1/shelfsense/settings" method="PUT">
+        <service class="Semattor\ShelfSense\Api\SettingsManagementInterface" method="update"/>
+        <resources><resource ref="Semattor_ShelfSense::config"/></resources>
+    </route>
+</routes>
