@@ -25,6 +25,11 @@ class Tracker extends Template
         return $category ? (int)$category->getId() : 0;
     }
 
+    public function getSampleRate(): int
+    {
+        return $this->config->getSampleRate();
+    }
+
     public function getCollectUrl(): string
     {
         return $this->getUrl('shelfsense/track/collect');

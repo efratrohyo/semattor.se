@@ -60,20 +60,6 @@ class Applier
     }
 
     /**
-     * Re-sort only the categories that use Auto (hourly).
-     */
-    public function applyAuto(): array
-    {
-        $ids = [];
-        foreach ($this->getManagedCategories() as $id => $settings) {
-            if ($settings['mode'] === SortMode::AUTO) {
-                $ids[] = $id;
-            }
-        }
-        return $ids ? $this->applyAll($ids) : [];
-    }
-
-    /**
      * Every category with an active mode, plus every category that still has a backup
      * (so clearing the mode by import/API also restores the old order).
      *
@@ -110,10 +96,13 @@ class Applier
     /**
      * @return array<int, array{name: string, mode: string, action: string, changed: int}>
      */
-    public function applyAll(?array $onlyIds = null): array
+    public function applyAll(?array $onlyIds = null, bool $onlyDue = false): array
     {
         $report = [];
         foreach ($this->getManagedCategories($onlyIds) as $categoryId => $settings) {
+            if ($onlyDue && !$this->isDue($categoryId, $settings['mode'])) {
+                continue;
+            }
             try {
                 $report[$categoryId] = $this->applySettings($categoryId, $settings);
             } catch (\Throwable $e) {
@@ -124,6 +113,23 @@ class Applier
             }
         }
         return $report;
+    }
+
+    /**
+     * Night job: a category is re-sorted when its last sort is older than the interval
+     * (default every 2 days). A small margin makes sure "every 2 days" does not slip to 3.
+     */
+    private function isDue(int $categoryId, string $mode): bool
+    {
+        if (!in_array($mode, SortMode::activeModes(), true)) {
+            return true; // Standard with a backup left: restore
+        }
+        $last = $this->positions->getLastUpdated($categoryId);
+        if ($last === null) {
+            return true;
+        }
+        $interval = $this->config->getIntervalDays() * 86400 - 6 * 3600;
+        return strtotime($last . ' UTC') <= time() - $interval;
     }
 
     /**
@@ -215,6 +221,7 @@ class Applier
             'notInCategory' => $notInCategory,
             'lastUpdated' => $this->positions->getLastUpdated($categoryId),
             'auto' => $readiness,
+            'intervalDays' => $this->config->getIntervalDays(),
             'usedMode' => $active ? $mode : SortMode::STANDARD,
         ];
     }

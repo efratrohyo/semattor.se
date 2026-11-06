@@ -77,4 +77,14 @@ interface SettingsInterface
      * @return int Share of top places used for testing (%)
      */
     public function getAutoExploration(): int;
+
+    /**
+     * @return int Re-sort categories every X days
+     */
+    public function getIntervalDays(): int;
+
+    /**
+     * @return int Share of category page views that are measured (%)
+     */
+    public function getSampleRate(): int;
 }

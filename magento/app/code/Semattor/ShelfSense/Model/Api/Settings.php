@@ -21,7 +21,9 @@ class Settings implements SettingsInterface
         private readonly bool $trackingEnabled,
         private readonly int $autoMinDays,
         private readonly int $autoMinViews,
-        private readonly int $autoExploration
+        private readonly int $autoExploration,
+        private readonly int $intervalDays,
+        private readonly int $sampleRate
     ) {
     }
 
@@ -39,4 +41,6 @@ class Settings implements SettingsInterface
     public function getAutoMinDays(): int { return $this->autoMinDays; }
     public function getAutoMinViews(): int { return $this->autoMinViews; }
     public function getAutoExploration(): int { return $this->autoExploration; }
+    public function getIntervalDays(): int { return $this->intervalDays; }
+    public function getSampleRate(): int { return $this->sampleRate; }
 }

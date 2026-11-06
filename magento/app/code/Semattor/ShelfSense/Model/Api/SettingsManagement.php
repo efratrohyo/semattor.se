@@ -40,7 +40,9 @@ class SettingsManagement implements SettingsManagementInterface
             (bool)$v('auto/tracking'),
             (int)$v('auto/min_days'),
             (int)$v('auto/min_views'),
-            (int)$v('auto/exploration')
+            (int)$v('auto/exploration'),
+            (int)$v('general/interval_days'),
+            (int)$v('auto/sample_rate')
         );
     }
 
@@ -58,7 +60,9 @@ class SettingsManagement implements SettingsManagementInterface
         ?bool $trackingEnabled = null,
         ?int $autoMinDays = null,
         ?int $autoMinViews = null,
-        ?int $autoExploration = null
+        ?int $autoExploration = null,
+        ?int $intervalDays = null,
+        ?int $sampleRate = null
     ): SettingsInterface {
         $changes = [];
         $bool = static fn (?bool $b) => $b === null ? null : ($b ? '1' : '0');
@@ -88,6 +92,11 @@ class SettingsManagement implements SettingsManagementInterface
             throw new InputException(__('autoExploration must be between 0 and 50.'));
         }
         $changes['auto/exploration'] = $autoExploration === null ? null : (string)$autoExploration;
+        $changes['general/interval_days'] = $positive($intervalDays, 'intervalDays', 1);
+        if ($sampleRate !== null && ($sampleRate < 1 || $sampleRate > 100)) {
+            throw new InputException(__('sampleRate must be between 1 and 100.'));
+        }
+        $changes['auto/sample_rate'] = $sampleRate === null ? null : (string)$sampleRate;
         if ($schedule !== null) {
             if (count(preg_split('/\s+/', trim($schedule))) !== 5) {
                 throw new InputException(__('schedule must be a cron expression with 5 parts, e.g. "15 3 * * *".'));

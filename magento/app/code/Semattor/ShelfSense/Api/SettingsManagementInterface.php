@@ -31,6 +31,8 @@ interface SettingsManagementInterface
      * @param int|null $autoMinDays
      * @param int|null $autoMinViews
      * @param int|null $autoExploration
+     * @param int|null $intervalDays
+     * @param int|null $sampleRate
      * @return \Semattor\ShelfSense\Api\Data\SettingsInterface
      * @throws \Magento\Framework\Exception\InputException
      */
@@ -48,6 +50,8 @@ interface SettingsManagementInterface
         ?bool $trackingEnabled = null,
         ?int $autoMinDays = null,
         ?int $autoMinViews = null,
-        ?int $autoExploration = null
+        ?int $autoExploration = null,
+        ?int $intervalDays = null,
+        ?int $sampleRate = null
     ): \Semattor\ShelfSense\Api\Data\SettingsInterface;
 }

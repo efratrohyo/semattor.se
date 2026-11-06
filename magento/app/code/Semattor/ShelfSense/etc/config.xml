@@ -7,6 +7,7 @@
                 <cron_expr>15 3 * * *</cron_expr>
                 <out_of_stock_last>1</out_of_stock_last>
                 <top_count>300</top_count>
+                <interval_days>2</interval_days>
             </general>
             <bestseller>
                 <days>90</days>
@@ -14,11 +15,11 @@
             <auto>
                 <tracking>1</tracking>
                 <min_days>14</min_days>
-                <min_views>2000</min_views>
+                <min_views>1000</min_views>
+                <sample_rate>50</sample_rate>
                 <exploration>15</exploration>
                 <window_days>28</window_days>
                 <min_product_views>30</min_product_views>
-                <cron_expr>20 * * * *</cron_expr>
             </auto>
             <smart>
                 <weight_sales>50</weight_sales>

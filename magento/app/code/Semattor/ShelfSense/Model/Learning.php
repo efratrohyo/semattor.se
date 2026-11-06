@@ -19,8 +19,8 @@ use Magento\Framework\DB\Sql\Expression;
  * wide guess, so it sometimes comes out high and gets tested. Known products fill most places. A share
  * of the places (default 15%) is kept for products Auto knows little about.
  *
- * The random draw uses a seed that changes every hour, so the preview and the saved order in the
- * same hour are the same.
+ * The random draw uses a seed that changes every re-sort period (default 2 days), so the preview
+ * and the saved order in the same period are the same.
  */
 class Learning
 {
@@ -91,7 +91,8 @@ class Learning
             $avgValuePerClick = 1.0;
         }
 
-        mt_srand(crc32($categoryId . '|' . gmdate('Y-m-d H')));
+        // Same seed for the whole re-sort period, so preview and saved order match.
+        mt_srand(crc32($categoryId . '|' . intdiv(time(), $this->config->getIntervalDays() * 86400)));
         $alpha0 = self::PRIOR_STRENGTH * $avgCtr;
         $beta0 = self::PRIOR_STRENGTH * (1 - $avgCtr);
         $minViews = $this->config->getAutoMinProductViews();

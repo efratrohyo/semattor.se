@@ -13,8 +13,13 @@
                     <comment>Only changes categories where you chose something other than "Standard". Other categories are never touched.</comment>
                 </field>
                 <field id="cron_expr" translate="label comment" type="text" sortOrder="20" showInDefault="1">
-                    <label>When to update the order (cron)</label>
-                    <comment>Default: 15 3 * * * (every night at 03:15). When you save a category, its order is also updated right away.</comment>
+                    <label>Night run time (cron)</label>
+                    <comment>Default: 15 3 * * * (03:15). The night run only re-sorts categories that are due (see next field). When you save a category, its order is updated right away.</comment>
+                </field>
+                <field id="interval_days" translate="label comment" type="text" sortOrder="22" showInDefault="1">
+                    <label>Re-sort every X days</label>
+                    <comment>Default 2. A higher number means less work for the server and fewer changes for search and feeds. Applies to all options, also Auto.</comment>
+                    <validate>validate-digits validate-greater-than-zero</validate>
                 </field>
                 <field id="top_count" translate="label comment" type="text" sortOrder="25" showInDefault="1">
                     <label>Sort the top X products</label>
@@ -41,6 +46,11 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>Counts which products customers see and click in category lists. No personal data is stored, only numbers per day.</comment>
                 </field>
+                <field id="sample_rate" translate="label comment" type="text" sortOrder="15" showInDefault="1">
+                    <label>Measure X% of category page views</label>
+                    <comment>Default 50. Each measured page sends one small request when the customer leaves the page. Lower = less server load, but Auto needs more days to learn.</comment>
+                    <validate>validate-digits validate-digits-range digits-range-1-100</validate>
+                </field>
                 <field id="min_days" translate="label" type="text" sortOrder="20" showInDefault="1">
                     <label>Days of data needed before Auto can be chosen</label>
                     <validate>validate-digits validate-greater-than-zero</validate>
@@ -62,10 +72,6 @@
                     <label>Views before a product counts as known</label>
                     <comment>Products with fewer views are tested in the testing places.</comment>
                     <validate>validate-digits validate-greater-than-zero</validate>
-                </field>
-                <field id="cron_expr" translate="label comment" type="text" sortOrder="70" showInDefault="1">
-                    <label>When Auto re-sorts (cron)</label>
-                    <comment>Default: 20 * * * * (every hour).</comment>
                 </field>
             </group>
             <group id="smart" translate="label comment" sortOrder="30" showInDefault="1">

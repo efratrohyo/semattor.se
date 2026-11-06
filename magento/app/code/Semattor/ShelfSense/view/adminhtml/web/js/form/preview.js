@@ -19,6 +19,7 @@ define(['uiComponent', 'jquery', 'underscore', 'mage/translate'], function (Comp
             lastUpdated: null,
             autoStatus: null,
             usedMode: '',
+            intervalDays: 2,
             listens: {
                 mode: 'schedule',
                 pinned: 'schedule',
@@ -75,6 +76,7 @@ define(['uiComponent', 'jquery', 'underscore', 'mage/translate'], function (Comp
                 self.lastUpdated(data.lastUpdated || null);
                 self.autoStatus(data.auto || null);
                 self.usedMode(data.usedMode || '');
+                self.intervalDays = data.intervalDays || 2;
             }).fail(function () {
                 self.error($t('Could not load the preview. Try again.'));
             }).always(function () {
@@ -120,7 +122,9 @@ define(['uiComponent', 'jquery', 'underscore', 'mage/translate'], function (Comp
             if (!value) {
                 return $t('Not sorted yet. Click Save to apply.');
             }
-            return $t('Last sorted: %1 (sorts when you save and every night at 03:15)').replace('%1', new Date(value.replace(' ', 'T') + 'Z').toLocaleString());
+            return $t('Last sorted: %1 (sorts when you save and every %2 days at night)')
+                .replace('%1', new Date(value.replace(' ', 'T') + 'Z').toLocaleString())
+                .replace('%2', this.intervalDays);
         },
 
         soldText: function (item) {

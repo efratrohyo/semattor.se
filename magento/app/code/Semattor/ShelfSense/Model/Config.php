@@ -31,6 +31,22 @@ class Config
         return max(0, $this->int('general/top_count', 300));
     }
 
+    /**
+     * Re-sort categories every X days (night job).
+     */
+    public function getIntervalDays(): int
+    {
+        return max(1, $this->int('general/interval_days', 2));
+    }
+
+    /**
+     * Share of category page views that are measured (%).
+     */
+    public function getSampleRate(): int
+    {
+        return min(100, max(1, $this->int('auto/sample_rate', 50)));
+    }
+
     public function isTrackingEnabled(): bool
     {
         return $this->scopeConfig->isSetFlag(self::PREFIX . 'auto/tracking');

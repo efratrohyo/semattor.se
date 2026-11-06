@@ -24,7 +24,7 @@ class ApplyAll
         }
         // Keep 120 days of view/click statistics.
         $this->learning->purgeOlderThan(120);
-        foreach ($this->applier->applyAll() as $categoryId => $row) {
+        foreach ($this->applier->applyAll(null, true) as $categoryId => $row) {
             $this->logger->info(sprintf(
                 'ShelfSense: category %d (%s) mode=%s -> %s, %d positions changed',
                 $categoryId,

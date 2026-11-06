@@ -8,7 +8,7 @@ Customers never see the name of the option. They only see the new order.
 | **Standard** *(default)* | Products follow their position numbers, lowest first (-8, -5, -1, 0 …). ShelfSense does not touch the category. |
 | **Newest first** | The product added last comes first (highest product ID first). |
 | **Most relevant (smart)** | Each product gets a score: 50% sales, 25% how new it is, 25% your own position numbers. Highest score first. See below. |
-| **Auto (learning)** | Learns from what customers see, click and buy in this category. Tests new products in a few places and moves up what sells. Re-sorts every hour. Unlocks when the category has enough data. See below. |
+| **Auto (learning)** | Learns from what customers see, click and buy in this category. Tests new products in a few places and moves up what sells. Unlocks when the category has enough data. See below. |
 | **Best sellers** | Most units sold in the last 90 days first. If equal: most sold in the last 30 days, then highest product ID. |
 
 Extra:
@@ -23,7 +23,7 @@ and which they click. Only numbers per day, per store, category and product are 
 Turn it off under Settings → "Collect views and clicks".
 
 **When it unlocks:** the Auto card is locked and shows the progress, e.g.
-"Collecting data: 9 of 14 days, 1 240 of 2 000 product views". It unlocks per category when both are reached.
+"Collecting data: 9 of 14 days, 640 of 1 000 product views". It unlocks per category when both are reached.
 
 **How it ranks:** for each product: *chance of a click* (views and clicks in this category) ×
 *money per click* (orders and clicks of the product). It does not just take the average: products with
@@ -31,7 +31,11 @@ little data get a wider guess, so they are sometimes tested higher (Thompson sam
 Every ~7th place (15%, setting "Testing share") is used to test products Auto knows little about.
 What sells moves up, what does not moves down. Pinned SKUs first and sold out last still apply.
 
-**How often:** every hour (setting "When Auto re-sorts"). The order stays the same within an hour.
+**How often:** like all options, every 2 days at night (setting "Re-sort every X days").
+
+**Server load:** only 50% of category page views are measured (setting "Measure X% of category page
+views"). A measured page sends one small request when the customer leaves it. Pages that are not
+measured do no work at all.
 
 ## Pinned SKUs on top
 
@@ -60,7 +64,7 @@ What sells moves up, what does not moves down. Pinned SKUs first and sold out la
 3. Look at the **preview** under the cards. It shows the first 12 products customers will see
    under "Populärt" – before you save. Tags show *Pinned*, *New*, *Sold out* and units sold.
    If a pinned SKU is not in the category, you get a warning.
-4. Click **Save**. The order is updated right away, and again every night.
+4. Click **Save**. The order is updated right away, and again every 2 days at night (setting).
    The preview shows when it was last updated.
 
 **Stores → Configuration → Catalog → ShelfSense Sorting** (set once)
