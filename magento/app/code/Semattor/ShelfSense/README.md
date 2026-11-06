@@ -12,6 +12,7 @@ Customers never see the name of the option. They only see the new order.
 | **Best sellers** | Most units sold in the last 90 days first. If equal: most sold in the last 30 days, then highest product ID. |
 
 Extra:
+- **Own brand first** (global setting, on by default) – in all options except Standard, SE Mattor products come before other brands. In categories without SE Mattor products (e.g. rugs with rubber backing), other brands are sorted as usual.
 - **Pinned SKUs on top** (optional) – products you always want first. See below.
 - **Sold out products last** (global setting) – sold out or disabled products go last.
 

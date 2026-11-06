@@ -47,6 +47,25 @@ class Config
         return min(100, max(1, $this->int('auto/sample_rate', 50)));
     }
 
+    public function isOwnBrandFirst(): bool
+    {
+        return $this->scopeConfig->isSetFlag(self::PREFIX . 'general/own_brand_first');
+    }
+
+    public function getBrandAttribute(): string
+    {
+        return trim((string)$this->scopeConfig->getValue(self::PREFIX . 'general/brand_attribute')) ?: 'brand';
+    }
+
+    /**
+     * @return string[] Brand names (option labels) that count as our own brand
+     */
+    public function getOwnBrands(): array
+    {
+        $raw = (string)$this->scopeConfig->getValue(self::PREFIX . 'general/own_brands');
+        return array_values(array_filter(array_map('trim', explode(',', $raw))));
+    }
+
     public function isTrackingEnabled(): bool
     {
         return $this->scopeConfig->isSetFlag(self::PREFIX . 'auto/tracking');

@@ -42,7 +42,9 @@ class SettingsManagement implements SettingsManagementInterface
             (int)$v('auto/min_views'),
             (int)$v('auto/exploration'),
             (int)$v('general/interval_days'),
-            (int)$v('auto/sample_rate')
+            (int)$v('auto/sample_rate'),
+            (bool)$v('general/own_brand_first'),
+            (string)$v('general/own_brands')
         );
     }
 
@@ -62,7 +64,9 @@ class SettingsManagement implements SettingsManagementInterface
         ?int $autoMinViews = null,
         ?int $autoExploration = null,
         ?int $intervalDays = null,
-        ?int $sampleRate = null
+        ?int $sampleRate = null,
+        ?bool $ownBrandFirst = null,
+        ?string $ownBrands = null
     ): SettingsInterface {
         $changes = [];
         $bool = static fn (?bool $b) => $b === null ? null : ($b ? '1' : '0');
@@ -97,6 +101,8 @@ class SettingsManagement implements SettingsManagementInterface
             throw new InputException(__('sampleRate must be between 1 and 100.'));
         }
         $changes['auto/sample_rate'] = $sampleRate === null ? null : (string)$sampleRate;
+        $changes['general/own_brand_first'] = $bool($ownBrandFirst);
+        $changes['general/own_brands'] = $ownBrands === null ? null : trim($ownBrands);
         if ($schedule !== null) {
             if (count(preg_split('/\s+/', trim($schedule))) !== 5) {
                 throw new InputException(__('schedule must be a cron expression with 5 parts, e.g. "15 3 * * *".'));

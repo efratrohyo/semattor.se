@@ -212,6 +212,7 @@ class Applier
                 'score' => $mode === SortMode::SMART ? round($item->score, 2) : null,
                 'views' => $item->views,
                 'clicks' => $item->clicks,
+                'ownBrand' => $item->ownBrand,
             ];
         }
 

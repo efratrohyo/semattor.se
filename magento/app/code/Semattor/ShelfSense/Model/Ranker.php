@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace Semattor\ShelfSense\Model;
 
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
+use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Visibility;
+use Magento\Eav\Model\Config as EavConfig;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory as ProductCollectionFactory;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Sql\Expression;
@@ -20,7 +22,8 @@ class Ranker
         private readonly ResourceConnection $resource,
         private readonly ProductCollectionFactory $productCollectionFactory,
         private readonly Config $config,
-        private readonly Learning $learning
+        private readonly Learning $learning,
+        private readonly EavConfig $eavConfig
     ) {
     }
 
@@ -58,7 +61,8 @@ class Ranker
         $strategy = $this->comparator($mode);
         $oosLast = $this->config->isOutOfStockLast();
 
-        usort($items, static function (RankedItem $a, RankedItem $b) use ($strategy, $oosLast): int {
+        $ownBrandFirst = $this->config->isOwnBrandFirst();
+        usort($items, static function (RankedItem $a, RankedItem $b) use ($strategy, $oosLast, $ownBrandFirst): int {
             // 1) Sold-out / disabled last – also when pinned, so a sold out product never sits on top.
             if ($oosLast && $a->sellable !== $b->sellable) {
                 return $b->sellable <=> $a->sellable;
@@ -67,13 +71,45 @@ class Ranker
             if ($a->pinned || $b->pinned) {
                 return $b->pinned <=> $a->pinned ?: $a->pinIndex <=> $b->pinIndex;
             }
-            // 3) Strategy, falling back to the original manual order (stable + predictable).
+            // 3) Own brand (SE Mattor) before other brands.
+            if ($ownBrandFirst && $a->ownBrand !== $b->ownBrand) {
+                return $b->ownBrand <=> $a->ownBrand;
+            }
+            // 4) Strategy, falling back to the original manual order (stable + predictable).
             return $strategy($a, $b)
                 ?: $a->baselinePosition <=> $b->baselinePosition
                 ?: $a->productId <=> $b->productId;
         });
 
         return $items;
+    }
+
+    /**
+     * Option ids of the brand attribute whose label is one of our own brands.
+     *
+     * @return array<string,bool>
+     */
+    private function ownBrandOptionIds(): array
+    {
+        $names = array_map('mb_strtolower', $this->config->getOwnBrands());
+        if ($names === []) {
+            return [];
+        }
+        try {
+            $attribute = $this->eavConfig->getAttribute(Product::ENTITY, $this->config->getBrandAttribute());
+            if (!$attribute || !$attribute->getId() || !$attribute->usesSource()) {
+                return [];
+            }
+            $ids = [];
+            foreach ($attribute->setStoreId(0)->getSource()->getAllOptions(false) as $option) {
+                if (in_array(mb_strtolower(trim((string)$option['label'])), $names, true)) {
+                    $ids[(string)$option['value']] = true;
+                }
+            }
+            return $ids;
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     /**
@@ -168,7 +204,8 @@ class Ranker
                 Visibility::VISIBILITY_IN_CATALOG,
                 Visibility::VISIBILITY_BOTH,
             ]])
-            ->addAttributeToSelect(['status', 'name']);
+            ->addAttributeToSelect(['status', 'name', $this->config->getBrandAttribute()]);
+        $ownBrandIds = $this->ownBrandOptionIds();
 
         $skuById = [];
         foreach ($collection as $product) {
@@ -192,6 +229,7 @@ class Ranker
                 ($stock[$id] ?? true) && (int)$product->getData('status') !== Status::STATUS_DISABLED
             );
             $item->name = (string)$product->getName();
+            $item->ownBrand = isset($ownBrandIds[(string)$product->getData($this->config->getBrandAttribute())]);
             $items[] = $item;
         }
         return $items;

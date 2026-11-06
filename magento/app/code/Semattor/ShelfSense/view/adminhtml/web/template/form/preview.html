@@ -23,6 +23,7 @@
                 </span>
                 <span class="shelfsense-row__tags">
                     <span class="shelfsense-tag is-pinned" if="item.pinned" translate="'Pinned'"></span>
+                    <span class="shelfsense-tag is-brand" if="item.ownBrand" translate="'Own brand'"></span>
                     <span class="shelfsense-tag is-new" if="item.isNew" translate="'New'"></span>
                     <span class="shelfsense-tag is-soldout" if="item.soldOut" translate="'Sold out'"></span>
                     <span class="shelfsense-tag" if="$parent.showViews()" text="$parent.viewsText(item)"></span>

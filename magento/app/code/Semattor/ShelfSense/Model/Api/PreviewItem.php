@@ -19,7 +19,8 @@ class PreviewItem implements PreviewItemInterface
         private readonly bool $isNew,
         private readonly ?float $score,
         private readonly int $views = 0,
-        private readonly int $clicks = 0
+        private readonly int $clicks = 0,
+        private readonly bool $ownBrand = false
     ) {
     }
 
@@ -35,4 +36,5 @@ class PreviewItem implements PreviewItemInterface
     public function getScore(): ?float { return $this->score; }
     public function getViews(): int { return $this->views; }
     public function getClicks(): int { return $this->clicks; }
+    public function getOwnBrand(): bool { return $this->ownBrand; }
 }

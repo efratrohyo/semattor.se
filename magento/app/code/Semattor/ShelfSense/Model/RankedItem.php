@@ -14,6 +14,7 @@ class RankedItem
     public string $name = '';
     public int $views = 0;
     public int $clicks = 0;
+    public bool $ownBrand = false;
 
     public function __construct(
         public readonly int $productId,

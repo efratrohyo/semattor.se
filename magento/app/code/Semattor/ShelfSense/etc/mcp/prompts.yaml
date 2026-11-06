@@ -26,3 +26,22 @@
       required: true
   required_tools: builtin_system_restapi
   is_active: true
+- code: shelfsense_stats
+  title: ShelfSense Sorting – statistics
+  description: Statistics and advice for one category or the whole shop.
+  content: |
+    Read the ShelfSense Sorting documentation first (docsearch: "ShelfSense Sorting", section "Statistics for the merchant").
+    Scope: {{category}} (empty = the 15 categories with most sales).
+    Show, in short tables and plain English:
+    1. Mode per category and when it was last sorted.
+    2. Sales last 30 days (units and revenue) and the share from our own brand (SE Mattor).
+    3. Click rate (clicks / views) per category from semattor_shelfsense_stats, if there is data.
+    4. Top 10 products and products with many views but few clicks.
+    5. Own brand share of the first 24 places in the preview.
+    Finish with 3-5 concrete suggestions (mode changes, pins, products to check). Do not change anything.
+  arguments:
+    - name: category
+      description: "Category id or name (optional)"
+      required: false
+  required_tools: builtin_system_dbreader,builtin_system_restapi
+  is_active: true

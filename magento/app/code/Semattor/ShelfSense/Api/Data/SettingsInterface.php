@@ -87,4 +87,14 @@ interface SettingsInterface
      * @return int Share of category page views that are measured (%)
      */
     public function getSampleRate(): int;
+
+    /**
+     * @return bool Own brand before other brands in all options except Standard
+     */
+    public function getOwnBrandFirst(): bool;
+
+    /**
+     * @return string Own brand names, comma separated (e.g. "SE Mattor")
+     */
+    public function getOwnBrands(): string;
 }

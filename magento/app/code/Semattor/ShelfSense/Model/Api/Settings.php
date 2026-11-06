@@ -23,7 +23,9 @@ class Settings implements SettingsInterface
         private readonly int $autoMinViews,
         private readonly int $autoExploration,
         private readonly int $intervalDays,
-        private readonly int $sampleRate
+        private readonly int $sampleRate,
+        private readonly bool $ownBrandFirst,
+        private readonly string $ownBrands
     ) {
     }
 
@@ -43,4 +45,6 @@ class Settings implements SettingsInterface
     public function getAutoExploration(): int { return $this->autoExploration; }
     public function getIntervalDays(): int { return $this->intervalDays; }
     public function getSampleRate(): int { return $this->sampleRate; }
+    public function getOwnBrandFirst(): bool { return $this->ownBrandFirst; }
+    public function getOwnBrands(): string { return $this->ownBrands; }
 }

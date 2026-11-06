@@ -33,6 +33,8 @@ interface SettingsManagementInterface
      * @param int|null $autoExploration
      * @param int|null $intervalDays
      * @param int|null $sampleRate
+     * @param bool|null $ownBrandFirst
+     * @param string|null $ownBrands
      * @return \Semattor\ShelfSense\Api\Data\SettingsInterface
      * @throws \Magento\Framework\Exception\InputException
      */
@@ -52,6 +54,8 @@ interface SettingsManagementInterface
         ?int $autoMinViews = null,
         ?int $autoExploration = null,
         ?int $intervalDays = null,
-        ?int $sampleRate = null
+        ?int $sampleRate = null,
+        ?bool $ownBrandFirst = null,
+        ?string $ownBrands = null
     ): \Semattor\ShelfSense\Api\Data\SettingsInterface;
 }

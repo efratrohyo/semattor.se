@@ -21,6 +21,21 @@
                     <comment>Default 2. A higher number means less work for the server and fewer changes for search and feeds. Applies to all options, also Auto.</comment>
                     <validate>validate-digits validate-greater-than-zero</validate>
                 </field>
+                <field id="own_brand_first" translate="label comment" type="select" sortOrder="23" showInDefault="1">
+                    <label>Own brand first</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>All options except Standard show our own brand before other brands. Other brands come after them. In a category without own brand products, the other brands are sorted as usual. Pinned SKUs still come first.</comment>
+                </field>
+                <field id="own_brands" translate="label comment" type="text" sortOrder="24" showInDefault="1">
+                    <label>Own brand names</label>
+                    <comment>Exact name(s) in the Brand attribute, separated by commas. Default: SE Mattor</comment>
+                    <depends><field id="own_brand_first">1</field></depends>
+                </field>
+                <field id="brand_attribute" translate="label comment" type="text" sortOrder="24" showInDefault="1">
+                    <label>Brand attribute code</label>
+                    <comment>Default: brand</comment>
+                    <depends><field id="own_brand_first">1</field></depends>
+                </field>
                 <field id="top_count" translate="label comment" type="text" sortOrder="25" showInDefault="1">
                     <label>Sort the top X products</label>
                     <comment>Default 300. These get an exact new order. The products after them keep their old order (sold out last). This keeps the work small for big categories, because the products further down almost never move. 0 = sort all products.</comment>

@@ -67,4 +67,9 @@ interface PreviewItemInterface
      * @return int Times clicked in this category list (Auto learning window)
      */
     public function getClicks(): int;
+
+    /**
+     * @return bool Product is our own brand (e.g. SE Mattor)
+     */
+    public function getOwnBrand(): bool;
 }

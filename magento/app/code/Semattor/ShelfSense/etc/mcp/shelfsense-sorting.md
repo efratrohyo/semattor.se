@@ -12,6 +12,7 @@ How to read and change ShelfSense Sorting through the REST API: which order cust
   - `bestseller` – most units sold in the last 90 days. All sizes and all 5 countries together.
   - `auto` ("Auto (learning)") – learns from views and clicks in this category list plus orders. Value per view = chance of a click × money per click. Products with little data are tested in every ~7th place (setting `autoExploration`, default 15%). Can only be chosen when the category has enough data (`autoReady`, `autoProgress`); default 14 days and 1 000 measured product views.
 - **Pinned SKUs** (comma separated) always come first, in that order. Sold out products always go last, also when pinned.
+- **Own brand first** (default on): in every mode except standard, products of our own brand (attribute `brand` = "SE Mattor") come before other brands (Elvara Living, Ruvano Interiors, Kuvani Home …). In a category without own brand products, other brands are sorted as usual. Order of rules: sold out last → pinned → own brand → mode. Preview items have `ownBrand`.
 - The setting is **global**: one order per category for all countries (SE, DK, FI, NO, NL).
 - The first time a category leaves `standard`, its position numbers are backed up. Setting `standard` again restores them exactly.
 - Categories are sorted on save, every `intervalDays` days at night (default 2, run time = setting `schedule`), and with `/sort`.
@@ -37,7 +38,7 @@ How to read and change ShelfSense Sorting through the REST API: which order cust
 
 ### Global settings
 - `GET /V1/shelfsense/settings`
-- `PUT /V1/shelfsense/settings` – send only what changes, e.g. `{"weightSales": 40, "weightNew": 20, "weightManual": 40}`. Fields: `enabled`, `soldOutLast`, `topCount` (0 = all), `salesDays`, `trendDays`, `newHalfLifeDays`, `weightSales`, `weightNew`, `weightManual`, `schedule` (cron, 5 parts), `trackingEnabled`, `autoMinDays`, `autoMinViews`, `autoExploration` (0-50 %), `intervalDays`, `sampleRate` (1-100 %).
+- `PUT /V1/shelfsense/settings` – send only what changes, e.g. `{"weightSales": 40, "weightNew": 20, "weightManual": 40}`. Fields: `enabled`, `soldOutLast`, `topCount` (0 = all), `salesDays`, `trendDays`, `newHalfLifeDays`, `weightSales`, `weightNew`, `weightManual`, `schedule` (cron, 5 parts), `trackingEnabled`, `autoMinDays`, `autoMinViews`, `autoExploration` (0-50 %), `intervalDays`, `sampleRate` (1-100 %), `ownBrandFirst`, `ownBrands` (comma separated brand names).
 - Settings apply at the next sort. To apply now: `POST /V1/shelfsense/categories/{id}/sort` for each active category.
 
 ### Recommended modes
@@ -46,6 +47,14 @@ How to read and change ShelfSense Sorting through the REST API: which order cust
 - Big room, size and style categories: `smart`.
 - Campaign categories (Black Friday, Cyber Monday, sales): `bestseller` while the campaign runs.
 - Small categories with few sales: `standard` or `smart`.
+
+## Statistics for the merchant
+
+Read only, with the database reader:
+- List views and clicks: table `semattor_shelfsense_stats` (stat_date, store_id, category_id, product_id, views, clicks). Only a sample of page views is measured (`sampleRate`), so compare ratios (click rate = clicks / views), not raw counts.
+- Sales: `sales_order_item` joined with `sales_order` (state not canceled/closed), `parent_item_id IS NULL` for one row per product. Brand: product attribute `brand` (option labels in `eav_attribute_option_value`).
+- Last sort per category: `semattor_shelfsense_state`. Mode per category: GET /V1/shelfsense/categories.
+- Useful questions: click rate per category and mode, own brand share of the first 24 places, top sellers per category, products with many views but few clicks (weak picture or price), new products that already sell.
 
 ## Pitfalls
 

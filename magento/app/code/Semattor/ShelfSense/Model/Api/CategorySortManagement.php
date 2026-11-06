@@ -182,7 +182,8 @@ class CategorySortManagement implements CategorySortManagementInterface
                 (bool)$row['isNew'],
                 $row['score'] === null ? null : (float)$row['score'],
                 (int)($row['views'] ?? 0),
-                (int)($row['clicks'] ?? 0)
+                (int)($row['clicks'] ?? 0),
+                (bool)($row['ownBrand'] ?? false)
             );
         }
         $mode = $mode ?: SortMode::STANDARD;

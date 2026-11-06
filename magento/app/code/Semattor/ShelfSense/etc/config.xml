@@ -8,6 +8,9 @@
                 <out_of_stock_last>1</out_of_stock_last>
                 <top_count>300</top_count>
                 <interval_days>2</interval_days>
+                <own_brand_first>1</own_brand_first>
+                <brand_attribute>brand</brand_attribute>
+                <own_brands>SE Mattor</own_brands>
             </general>
             <bestseller>
                 <days>90</days>
