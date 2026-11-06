@@ -72,4 +72,9 @@ interface PreviewItemInterface
      * @return bool Product is our own brand (e.g. SE Mattor)
      */
     public function getOwnBrand(): bool;
+
+    /**
+     * @return bool Shown on a test place (test products)
+     */
+    public function getTesting(): bool;
 }

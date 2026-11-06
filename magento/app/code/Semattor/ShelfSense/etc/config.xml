@@ -9,6 +9,7 @@
                 <top_count>300</top_count>
                 <interval_days>2</interval_days>
                 <own_brand_first>1</own_brand_first>
+                <test_place>5</test_place>
                 <brand_attribute>brand</brand_attribute>
                 <own_brands>SE Mattor</own_brands>
             </general>

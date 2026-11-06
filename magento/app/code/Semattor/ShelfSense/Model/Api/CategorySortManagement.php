@@ -14,6 +14,7 @@ use Semattor\ShelfSense\Model\Applier;
 use Semattor\ShelfSense\Model\PositionManager;
 use Semattor\ShelfSense\Model\Source\SortMode;
 use Semattor\ShelfSense\Setup\Patch\Data\AddCategoryAttributes as Attr;
+use Semattor\ShelfSense\Setup\Patch\Data\AddTestAttributes as TestAttr;
 
 class CategorySortManagement implements CategorySortManagementInterface
 {
@@ -40,7 +41,7 @@ class CategorySortManagement implements CategorySortManagementInterface
 
         $collection = $this->categoryCollectionFactory->create();
         $collection->setStoreId(0)
-            ->addAttributeToSelect(['name', Attr::ATTR_MODE, Attr::ATTR_PINNED])
+            ->addAttributeToSelect(['name', Attr::ATTR_MODE, Attr::ATTR_PINNED, TestAttr::ATTR_TEST_SKUS, TestAttr::ATTR_TEST_UNTIL])
             ->addFieldToFilter('level', ['gteq' => 2])
             ->setOrder('path', 'ASC');
         $result = [];
@@ -49,6 +50,8 @@ class CategorySortManagement implements CategorySortManagementInterface
                 'name' => (string)$category->getName(),
                 'mode' => (string)$category->getData(Attr::ATTR_MODE),
                 'pinned' => $this->applier->parseSkus((string)$category->getData(Attr::ATTR_PINNED)),
+                'testSkus' => $this->applier->parseSkus((string)$category->getData(TestAttr::ATTR_TEST_SKUS)),
+                'testUntil' => $this->applier->dateOnly((string)$category->getData(TestAttr::ATTR_TEST_UNTIL)),
             ]);
         }
         return $result;
@@ -63,26 +66,47 @@ class CategorySortManagement implements CategorySortManagementInterface
             $settings['mode'],
             implode(', ', $settings['pinned']),
             $limit,
-            ''
+            '',
+            null,
+            null
         );
     }
 
-    public function preview(int $categoryId, string $mode, string $pinnedSkus = '', int $limit = 12): CategoryStatusInterface
-    {
+    public function preview(
+        int $categoryId,
+        string $mode,
+        string $pinnedSkus = '',
+        int $limit = 12,
+        ?string $testSkus = null,
+        ?string $testUntil = null
+    ): CategoryStatusInterface {
         $mode = $this->validMode($mode);
         $settings = $this->settings($categoryId);
-        return $this->withPreview(
+        $status = $this->withPreview(
             $categoryId,
             ['mode' => $mode, 'pinned' => $this->applier->parseSkus($pinnedSkus)] + $settings,
             $mode,
             $pinnedSkus,
             $limit,
-            'Preview only. Nothing was saved.'
+            'Preview only. Nothing was saved.',
+            $testSkus,
+            $testUntil
         );
+        if ($status->getOtherBrandSkus()) {
+            return $status->withMessage($status->getMessage() . ' Other brands would be shown above own brand: '
+                . implode(', ', $status->getOtherBrandSkus()) . '. Ask the merchant before saving.');
+        }
+        return $status;
     }
 
-    public function save(int $categoryId, string $mode, ?string $pinnedSkus = null): CategoryStatusInterface
-    {
+    public function save(
+        int $categoryId,
+        string $mode,
+        ?string $pinnedSkus = null,
+        ?string $testSkus = null,
+        ?string $testUntil = null,
+        bool $allowOtherBrands = false
+    ): CategoryStatusInterface {
         $mode = $this->validMode($mode);
         $current = $this->settings($categoryId); // 404 if missing
         if ($mode === SortMode::AUTO && $current['mode'] !== SortMode::AUTO) {
@@ -95,7 +119,28 @@ class CategorySortManagement implements CategorySortManagementInterface
             }
         }
 
-        // Save only these two attributes (global, store 0). No full category save,
+        // Our own brand always first: pinning or testing another brand needs the merchant's approval.
+        $lifted = array_merge(
+            $pinnedSkus !== null ? $this->applier->parseSkus($pinnedSkus) : [],
+            $testSkus !== null ? $this->applier->parseSkus($testSkus) : []
+        );
+        $otherBrands = $this->applier->otherBrandSkus($lifted);
+        if ($otherBrands && !$allowOtherBrands) {
+            throw new InputException(__(
+                'These SKUs are not our own brand and would be shown above it: %1. '
+                . 'Ask the merchant first. Send allowOtherBrands=true only after they approved.',
+                implode(', ', $otherBrands)
+            ));
+        }
+        $testUntilDate = null;
+        if ($testSkus !== null && $this->applier->parseSkus($testSkus)) {
+            $testUntilDate = $this->applier->dateOnly((string)$testUntil);
+            if ($testUntilDate === null || $testUntilDate < gmdate('Y-m-d')) {
+                throw new InputException(__('testUntil must be today or a later date (Y-m-d).'));
+            }
+        }
+
+        // Save only these attributes (global, store 0). No full category save,
         // so URL keys, products and other fields are never touched.
         $category = $this->categoryFactory->create()->setStoreId(0);
         $this->categoryResource->load($category, $categoryId);
@@ -105,6 +150,13 @@ class CategorySortManagement implements CategorySortManagementInterface
             $category->setData(Attr::ATTR_PINNED, implode(', ', $this->applier->parseSkus($pinnedSkus)));
             $this->categoryResource->saveAttribute($category, Attr::ATTR_PINNED);
         }
+        if ($testSkus !== null) {
+            $skus = $this->applier->parseSkus($testSkus);
+            $category->setData(TestAttr::ATTR_TEST_SKUS, implode(', ', $skus));
+            $category->setData(TestAttr::ATTR_TEST_UNTIL, $skus ? $testUntilDate . ' 00:00:00' : null);
+            $this->categoryResource->saveAttribute($category, TestAttr::ATTR_TEST_SKUS);
+            $this->categoryResource->saveAttribute($category, TestAttr::ATTR_TEST_UNTIL);
+        }
 
         $result = $this->applier->applyCategory($categoryId);
         return $this->get($categoryId)->withMessage(sprintf(
@@ -113,6 +165,25 @@ class CategorySortManagement implements CategorySortManagementInterface
             ucfirst($result['action'] ?? 'done'),
             (int)($result['changed'] ?? 0)
         ));
+    }
+
+    public function saveMany(array $categories, bool $allowOtherBrands = false): array
+    {
+        if (count($categories) > 100) {
+            throw new InputException(__('At most 100 categories per call.'));
+        }
+        $result = [];
+        foreach ($categories as $update) {
+            $result[] = $this->save(
+                $update->getCategoryId(),
+                $update->getMode(),
+                $update->getPinnedSkus(),
+                $update->getTestSkus(),
+                $update->getTestUntil(),
+                $allowOtherBrands
+            );
+        }
+        return $result;
     }
 
     public function sortNow(int $categoryId): CategoryStatusInterface
@@ -155,7 +226,15 @@ class CategorySortManagement implements CategorySortManagementInterface
             (string)$settings['name'],
             $mode,
             implode(', ', $settings['pinned']),
-            in_array($mode, SortMode::activeModes(), true) ? $this->positions->getLastUpdated($categoryId) : null
+            in_array($mode, SortMode::activeModes(), true) ? $this->positions->getLastUpdated($categoryId) : null,
+            0,
+            [],
+            [],
+            '',
+            false,
+            '',
+            implode(', ', $settings['testSkus'] ?? []),
+            $settings['testUntil'] ?? null
         );
     }
 
@@ -165,9 +244,18 @@ class CategorySortManagement implements CategorySortManagementInterface
         string $mode,
         string $pinnedRaw,
         int $limit,
-        string $message
+        string $message,
+        ?string $testRaw = null,
+        ?string $testUntil = null
     ): CategoryStatus {
-        $data = $this->applier->previewWith($categoryId, $mode, $pinnedRaw, max(1, min($limit, 100)));
+        $data = $this->applier->previewWith(
+            $categoryId,
+            $mode,
+            $pinnedRaw,
+            max(1, min($limit, 100)),
+            $testRaw,
+            $testUntil
+        );
         $items = [];
         foreach ($data['items'] as $i => $row) {
             $items[] = new PreviewItem(
@@ -183,7 +271,8 @@ class CategorySortManagement implements CategorySortManagementInterface
                 $row['score'] === null ? null : (float)$row['score'],
                 (int)($row['views'] ?? 0),
                 (int)($row['clicks'] ?? 0),
-                (bool)($row['ownBrand'] ?? false)
+                (bool)($row['ownBrand'] ?? false),
+                (bool)($row['testing'] ?? false)
             );
         }
         $mode = $mode ?: SortMode::STANDARD;
@@ -201,7 +290,10 @@ class CategorySortManagement implements CategorySortManagementInterface
             $items,
             $message,
             (bool)$data['auto']['ready'],
-            $this->progress($data['auto'])
+            $this->progress($data['auto']),
+            implode(', ', $testRaw !== null ? $this->applier->parseSkus($testRaw) : ($settings['testSkus'] ?? [])),
+            $data['testUntil'] ?? ($testRaw === null ? ($settings['testUntil'] ?? null) : $this->applier->dateOnly((string)$testUntil)),
+            $data['otherBrands'] ?? []
         );
     }
 

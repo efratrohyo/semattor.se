@@ -37,7 +37,10 @@ class Index extends Action implements HttpGetActionInterface
             return $result->setData($this->applier->previewWith(
                 $categoryId,
                 (string)$this->getRequest()->getParam('mode', ''),
-                (string)$this->getRequest()->getParam('pinned', '')
+                (string)$this->getRequest()->getParam('pinned', ''),
+                12,
+                (string)$this->getRequest()->getParam('test_skus', ''),
+                (string)$this->getRequest()->getParam('test_until', '')
             ));
         } catch (\Throwable $e) {
             return $result->setData(['error' => (string)__('Could not load the preview: %1', $e->getMessage())]);

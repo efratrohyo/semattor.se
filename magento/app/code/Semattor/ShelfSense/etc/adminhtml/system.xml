@@ -26,6 +26,11 @@
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>All options except Standard show our own brand before other brands. Other brands come after them. In a category without own brand products, the other brands are sorted as usual. Pinned SKUs still come first.</comment>
                 </field>
+                <field id="test_place" translate="label comment" type="text" sortOrder="23" showInDefault="1">
+                    <label>Test products start on place</label>
+                    <comment>Default 5. Test products set on a category are shown from this place until their end date.</comment>
+                    <validate>validate-digits validate-greater-than-zero</validate>
+                </field>
                 <field id="own_brands" translate="label comment" type="text" sortOrder="24" showInDefault="1">
                     <label>Own brand names</label>
                     <comment>Exact name(s) in the Brand attribute, separated by commas. Default: SE Mattor</comment>

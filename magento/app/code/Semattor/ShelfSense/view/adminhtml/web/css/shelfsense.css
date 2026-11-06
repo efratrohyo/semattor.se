@@ -59,6 +59,8 @@
 .shelfsense-tag { font-size: 11px; padding: 2px 8px; border-radius: 99px; background: #eee; color: #555; white-space: nowrap; }
 .shelfsense-tag.is-pinned { background: #e5f1fb; color: #0a5aa0; }
 .shelfsense-tag.is-brand { background: #efe8fb; color: #5b3a9c; }
+.shelfsense-tag.is-test { background: #fff1d6; color: #8a5a00; }
+.shelfsense-tag.is-other { background: #f1f1f1; color: #777; }
 .shelfsense-tag.is-new { background: #e7f5ec; color: #1f6b3a; }
 .shelfsense-tag.is-soldout { background: #fbe9e7; color: #a33224; }
 .shelfsense-preview__count { margin: 10px 0 0; font-size: 12px; color: #777; }

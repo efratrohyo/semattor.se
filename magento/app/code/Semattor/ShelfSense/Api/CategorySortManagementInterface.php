@@ -33,6 +33,8 @@ interface CategorySortManagementInterface
      * @param string $mode standard|newest|smart|bestseller
      * @param string $pinnedSkus comma separated
      * @param int $limit
+     * @param string|null $testSkus comma separated; null = use the saved test products
+     * @param string|null $testUntil Y-m-d, last day of the test
      * @return \Semattor\ShelfSense\Api\Data\CategoryStatusInterface
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      * @throws \Magento\Framework\Exception\InputException
@@ -41,7 +43,9 @@ interface CategorySortManagementInterface
         int $categoryId,
         string $mode,
         string $pinnedSkus = '',
-        int $limit = 12
+        int $limit = 12,
+        ?string $testSkus = null,
+        ?string $testUntil = null
     ): \Semattor\ShelfSense\Api\Data\CategoryStatusInterface;
 
     /**
@@ -51,6 +55,10 @@ interface CategorySortManagementInterface
      * @param int $categoryId
      * @param string $mode standard|newest|smart|bestseller
      * @param string|null $pinnedSkus comma separated; null = keep current, "" = remove all
+     * @param string|null $testSkus comma separated; null = keep current, "" = stop the test
+     * @param string|null $testUntil Y-m-d, last day of the test (required with testSkus)
+     * @param bool $allowOtherBrands must be true to pin or test products that are not our own brand.
+     *        Only send true after the merchant approved it in the conversation.
      * @return \Semattor\ShelfSense\Api\Data\CategoryStatusInterface
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      * @throws \Magento\Framework\Exception\InputException
@@ -58,8 +66,21 @@ interface CategorySortManagementInterface
     public function save(
         int $categoryId,
         string $mode,
-        ?string $pinnedSkus = null
+        ?string $pinnedSkus = null,
+        ?string $testSkus = null,
+        ?string $testUntil = null,
+        bool $allowOtherBrands = false
     ): \Semattor\ShelfSense\Api\Data\CategoryStatusInterface;
+
+    /**
+     * Change several categories at once (one after the other). Same rules as save().
+     *
+     * @param \Semattor\ShelfSense\Api\Data\CategoryUpdateInterface[] $categories
+     * @param bool $allowOtherBrands
+     * @return \Semattor\ShelfSense\Api\Data\CategoryStatusInterface[]
+     * @throws \Magento\Framework\Exception\InputException
+     */
+    public function saveMany(array $categories, bool $allowOtherBrands = false): array;
 
     /**
      * Sort the category again now with its saved option (e.g. after changing settings).

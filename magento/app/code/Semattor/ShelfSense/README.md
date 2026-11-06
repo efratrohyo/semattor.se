@@ -38,6 +38,19 @@ What sells moves up, what does not moves down. Pinned SKUs first and sold out la
 views"). A measured page sends one small request when the customer leaves it. Pages that are not
 measured do no work at all.
 
+## Our own brand always first
+
+- In every option except Standard, **SE Mattor comes before all other brands**. Auto also only tests SE Mattor products.
+- Other brands can only come above SE Mattor if you pin them or set them as test products.
+  The admin shows a warning ("Other brand above SE Mattor"), and the API refuses it unless it is
+  explicitly approved (`allowOtherBrands`). The AI assistant must ask you first.
+
+## Test products
+
+Try one or more products on a good place for a limited time:
+**Test products** (SKUs) + **Test until** (last day). They are shown from place 5 (setting), after pinned
+products, until the end date, then they go back automatically. Ask Claude for a report afterwards.
+
 ## Pinned SKUs on top
 
 - Write the SKU. For more than one, put a comma between them. For 3 products:

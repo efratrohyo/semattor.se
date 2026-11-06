@@ -35,6 +35,7 @@ interface SettingsManagementInterface
      * @param int|null $sampleRate
      * @param bool|null $ownBrandFirst
      * @param string|null $ownBrands
+     * @param bool $confirmOtherBrands must be true to turn ownBrandFirst off (merchant approval)
      * @return \Semattor\ShelfSense\Api\Data\SettingsInterface
      * @throws \Magento\Framework\Exception\InputException
      */
@@ -56,6 +57,7 @@ interface SettingsManagementInterface
         ?int $intervalDays = null,
         ?int $sampleRate = null,
         ?bool $ownBrandFirst = null,
-        ?string $ownBrands = null
+        ?string $ownBrands = null,
+        bool $confirmOtherBrands = false
     ): \Semattor\ShelfSense\Api\Data\SettingsInterface;
 }

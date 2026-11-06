@@ -2,6 +2,14 @@
 
 How to read and change ShelfSense Sorting through the REST API: which order customers see under "Populärt" on each category, pinned SKUs, and the global settings.
 
+## The merchant's rules (always follow)
+
+1. **SE Mattor is always number one.** In every category and every mode (newest, smart, bestseller, auto), our own brand comes before other brands. This is built in (`ownBrandFirst`).
+2. **Never lift another brand without asking.** Before pinning, testing or in any other way showing a product of another brand (Elvara Living, Ruvano Interiors, Kuvani Home, BoTryggt …) above SE Mattor products, explain why in the conversation and get a clear yes. Only then send `allowOtherBrands: true`. Never turn `ownBrandFirst` off without a clear yes (`confirmOtherBrands: true`).
+3. A good reason to suggest another brand: the category has no new SE Mattor products for a long time and needs something new, or SE Mattor has no products of that kind (e.g. rugs with rubber backing). Suggest it as a **test product** with an end date, then report how it did.
+4. Auto never tests other brands by itself; it only tests SE Mattor products.
+5. Always preview first and ask before saving on the live shop.
+
 ## Key concepts
 
 - "Populärt" is the default sort on the shop. Customers never see the option name, only the order.
@@ -35,6 +43,15 @@ How to read and change ShelfSense Sorting through the REST API: which order cust
 - `GET /V1/shelfsense/categories/{id}` shows `autoReady` and `autoProgress`. Saving `auto` before it is ready returns an error with the progress.
 - In the preview, `views` and `clicks` show what Auto has learned (last 28 days).
 - Good first candidates: the categories with the most traffic (e.g. Alla Mattor, Köksmattor, Vardagsrumsmattor, Sovrumsmattor).
+
+### Test products
+- Try products on a good place for a limited time: `PUT /V1/shelfsense/categories/{id}` with `{"mode": "smart", "testSkus": "SKU1, SKU2", "testUntil": "2026-12-01"}`. They are shown from place `testPlace` (default 5), after pinned products, in the given order, until and including `testUntil`. Then they go back automatically.
+- Stop a test early: `"testSkus": ""`.
+- Other-brand SKUs are refused unless `allowOtherBrands: true` (rule 2).
+- Report after the test: views and clicks in `semattor_shelfsense_stats` and sales of the test SKUs during the test, compared with the SE Mattor products around them.
+
+### Many categories at once
+`PUT /V1/shelfsense/categories` with body `{"categories": [{"categoryId": 507, "mode": "newest"}, {"categoryId": 389, "mode": "bestseller"}], "allowOtherBrands": false}`. Max 100. Each item takes the same fields as the single save (`pinnedSkus`, `testSkus`, `testUntil`). Preview the biggest ones first.
 
 ### Global settings
 - `GET /V1/shelfsense/settings`

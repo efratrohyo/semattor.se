@@ -66,8 +66,15 @@ class SettingsManagement implements SettingsManagementInterface
         ?int $intervalDays = null,
         ?int $sampleRate = null,
         ?bool $ownBrandFirst = null,
-        ?string $ownBrands = null
+        ?string $ownBrands = null,
+        bool $confirmOtherBrands = false
     ): SettingsInterface {
+        if ($ownBrandFirst === false && !$confirmOtherBrands) {
+            throw new InputException(__(
+                'Own brand first keeps SE Mattor above other brands. Ask the merchant first, '
+                . 'then send confirmOtherBrands=true to turn it off.'
+            ));
+        }
         $changes = [];
         $bool = static fn (?bool $b) => $b === null ? null : ($b ? '1' : '0');
         $positive = static function (?int $i, string $name, int $min) {

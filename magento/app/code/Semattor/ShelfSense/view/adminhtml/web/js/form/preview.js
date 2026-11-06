@@ -10,6 +10,9 @@ define(['uiComponent', 'jquery', 'underscore', 'mage/translate'], function (Comp
             previewUrl: '',
             mode: '',
             pinned: '',
+            testSkus: '',
+            testUntil: '',
+            otherBrands: [],
             categoryId: null,
             loading: false,
             error: '',
@@ -23,12 +26,14 @@ define(['uiComponent', 'jquery', 'underscore', 'mage/translate'], function (Comp
             listens: {
                 mode: 'schedule',
                 pinned: 'schedule',
+                testSkus: 'schedule',
+                testUntil: 'schedule',
                 categoryId: 'schedule'
             }
         },
 
         initObservable: function () {
-            this._super().observe(['mode', 'pinned', 'loading', 'error', 'items', 'total', 'notInCategory', 'lastUpdated', 'autoStatus', 'usedMode']);
+            this._super().observe(['testSkus', 'testUntil', 'otherBrands', 'mode', 'pinned', 'loading', 'error', 'items', 'total', 'notInCategory', 'lastUpdated', 'autoStatus', 'usedMode']);
             this.schedule = _.debounce(this.load.bind(this), 400);
             return this;
         },
@@ -66,6 +71,8 @@ define(['uiComponent', 'jquery', 'underscore', 'mage/translate'], function (Comp
                     category_id: id,
                     mode: this.mode() || '',
                     pinned: this.pinned() || '',
+                    test_skus: this.testSkus() || '',
+                    test_until: this.testUntil() || '',
                     form_key: window.FORM_KEY
                 }
             }).done(function (data) {
@@ -75,6 +82,7 @@ define(['uiComponent', 'jquery', 'underscore', 'mage/translate'], function (Comp
                 self.notInCategory(data.notInCategory || []);
                 self.lastUpdated(data.lastUpdated || null);
                 self.autoStatus(data.auto || null);
+                self.otherBrands(data.otherBrands || []);
                 self.usedMode(data.usedMode || '');
                 self.intervalDays = data.intervalDays || 2;
             }).fail(function () {
@@ -129,6 +137,10 @@ define(['uiComponent', 'jquery', 'underscore', 'mage/translate'], function (Comp
 
         soldText: function (item) {
             return $t('%1 sold').replace('%1', item.sold);
+        },
+
+        otherBrandText: function () {
+            return $t('Other brand above SE Mattor: %1. Only do this on purpose.').replace('%1', this.otherBrands().join(', '));
         },
 
         missingText: function () {

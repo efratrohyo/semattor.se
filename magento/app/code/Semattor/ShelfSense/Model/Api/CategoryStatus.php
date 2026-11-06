@@ -22,7 +22,10 @@ class CategoryStatus implements CategoryStatusInterface
         private readonly array $preview = [],
         private string $message = '',
         private readonly bool $autoReady = false,
-        private readonly string $autoProgress = ''
+        private readonly string $autoProgress = '',
+        private readonly string $testSkus = '',
+        private readonly ?string $testUntil = null,
+        private readonly array $otherBrandSkus = []
     ) {
     }
 
@@ -37,6 +40,9 @@ class CategoryStatus implements CategoryStatusInterface
     public function getMessage(): string { return $this->message; }
     public function getAutoReady(): bool { return $this->autoReady; }
     public function getAutoProgress(): string { return $this->autoProgress; }
+    public function getTestSkus(): string { return $this->testSkus; }
+    public function getTestUntil(): ?string { return $this->testUntil; }
+    public function getOtherBrandSkus(): array { return $this->otherBrandSkus; }
 
     public function withMessage(string $message): self
     {

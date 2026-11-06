@@ -5,6 +5,10 @@
         <service class="Semattor\ShelfSense\Api\CategorySortManagementInterface" method="getList"/>
         <resources><resource ref="Magento_Catalog::categories"/></resources>
     </route>
+    <route url="/V1/shelfsense/categories" method="PUT">
+        <service class="Semattor\ShelfSense\Api\CategorySortManagementInterface" method="saveMany"/>
+        <resources><resource ref="Magento_Catalog::categories"/></resources>
+    </route>
     <route url="/V1/shelfsense/categories/:categoryId" method="GET">
         <service class="Semattor\ShelfSense\Api\CategorySortManagementInterface" method="get"/>
         <resources><resource ref="Magento_Catalog::categories"/></resources>

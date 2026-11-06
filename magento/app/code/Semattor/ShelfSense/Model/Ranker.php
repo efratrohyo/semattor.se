@@ -32,7 +32,13 @@ class Ranker
      * @param string[] $pinnedSkus
      * @return RankedItem[] in final order
      */
-    public function rank(string $mode, array $baseline, array $pinnedSkus = [], int $categoryId = 0): array
+    public function rank(
+        string $mode,
+        array $baseline,
+        array $pinnedSkus = [],
+        int $categoryId = 0,
+        array $testSkus = []
+    ): array
     {
         if ($baseline === []) {
             return [];
@@ -81,7 +87,64 @@ class Ranker
                 ?: $a->productId <=> $b->productId;
         });
 
+        return $this->placeTestProducts($items, $testSkus);
+    }
+
+    /**
+     * Test products go to a fixed place (setting, default 5) in the order given, after pinned products.
+     * Sold out test products are not moved.
+     *
+     * @param RankedItem[] $items
+     * @param string[] $testSkus
+     * @return RankedItem[]
+     */
+    private function placeTestProducts(array $items, array $testSkus): array
+    {
+        if ($testSkus === []) {
+            return $items;
+        }
+        $wanted = array_flip(array_map('mb_strtolower', array_values($testSkus)));
+        $tests = [];
+        foreach ($items as $i => $item) {
+            $key = mb_strtolower($item->sku);
+            if (isset($wanted[$key]) && !$item->pinned && $item->sellable) {
+                $item->testing = true;
+                $tests[$wanted[$key]] = $item;
+                unset($items[$i]);
+            }
+        }
+        if ($tests === []) {
+            return array_values($items);
+        }
+        ksort($tests);
+        $items = array_values($items);
+        $pinnedCount = count(array_filter($items, static fn (RankedItem $i): bool => $i->pinned));
+        $at = min(count($items), max($pinnedCount, $this->config->getTestPlace() - 1));
+        array_splice($items, $at, 0, array_values($tests));
         return $items;
+    }
+
+    /**
+     * @param string[] $skus
+     * @return string[] SKUs that are in the catalog but NOT our own brand
+     */
+    public function otherBrandSkus(array $skus): array
+    {
+        if ($skus === [] || !$this->config->isOwnBrandFirst()) {
+            return [];
+        }
+        $collection = $this->productCollectionFactory->create();
+        $collection->setStoreId(0)
+            ->addAttributeToFilter('sku', ['in' => $skus])
+            ->addAttributeToSelect([$this->config->getBrandAttribute()]);
+        $own = $this->ownBrandOptionIds();
+        $other = [];
+        foreach ($collection as $product) {
+            if (!isset($own[(string)$product->getData($this->config->getBrandAttribute())])) {
+                $other[] = (string)$product->getSku();
+            }
+        }
+        return $other;
     }
 
     /**

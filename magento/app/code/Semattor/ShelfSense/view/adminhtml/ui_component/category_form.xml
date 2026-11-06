@@ -66,7 +66,38 @@
             <settings>
                 <dataType>text</dataType>
                 <label translate="true">Pinned on top (optional)</label>
-                <notice translate="true">Products you always want first. Put a comma between SKUs: SKU1, SKU2, SKU3. The first SKU is shown first. No limit. Pinned products go above everything else. If a pinned product is sold out, it goes last until it is back in stock. For products with sizes, use the main SKU.</notice>
+                <notice translate="true">Products you always want first. Put a comma between SKUs: SKU1, SKU2, SKU3. The first SKU is shown first. No limit. Pinned products go above everything else, also above SE Mattor, so only pin other brands on purpose. If a pinned product is sold out, it goes last until it is back in stock. For products with sizes, use the main SKU.</notice>
+            </settings>
+        </field>
+
+        <field name="shelfsense_test_skus" formElement="input" sortOrder="24">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">category</item>
+                    <item name="placeholder" xsi:type="string">SKU1, SKU2</item>
+                    <item name="imports" xsi:type="array">
+                        <item name="visible" xsi:type="string">${ $.parentName }.shelfsense_mode:hasActiveMode</item>
+                    </item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Test products (optional)</label>
+                <notice translate="true">Try a product on a good place (default place 5, after pinned products) until the end date below. Afterwards it goes back automatically. Ask Claude for a report on how it did. Products of other brands than SE Mattor are shown with a warning.</notice>
+            </settings>
+        </field>
+        <field name="shelfsense_test_until" formElement="date" sortOrder="26">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">category</item>
+                    <item name="imports" xsi:type="array">
+                        <item name="visible" xsi:type="string">${ $.parentName }.shelfsense_mode:hasActiveMode</item>
+                    </item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Test until (last day)</label>
             </settings>
         </field>
 
@@ -79,6 +110,8 @@
                     <item name="imports" xsi:type="array">
                         <item name="mode" xsi:type="string">${ $.parentName }.shelfsense_mode:value</item>
                         <item name="pinned" xsi:type="string">${ $.parentName }.shelfsense_pinned_skus:value</item>
+                        <item name="testSkus" xsi:type="string">${ $.parentName }.shelfsense_test_skus:value</item>
+                        <item name="testUntil" xsi:type="string">${ $.parentName }.shelfsense_test_until:value</item>
                         <item name="categoryId" xsi:type="string">${ $.provider }:data.entity_id</item>
                     </item>
                 </item>

@@ -14,6 +14,7 @@ use Magento\Framework\Indexer\CacheContext;
 use Psr\Log\LoggerInterface;
 use Semattor\ShelfSense\Model\Source\SortMode;
 use Semattor\ShelfSense\Setup\Patch\Data\AddCategoryAttributes as Attr;
+use Semattor\ShelfSense\Setup\Patch\Data\AddTestAttributes as TestAttr;
 
 /**
  * Applies (or undoes) ShelfSense for categories, then refreshes indexes and page cache
@@ -69,7 +70,7 @@ class Applier
     {
         $collection = $this->categoryCollectionFactory->create();
         $collection->setStoreId(0)
-            ->addAttributeToSelect([Attr::ATTR_MODE, Attr::ATTR_PINNED, 'name']);
+            ->addAttributeToSelect([Attr::ATTR_MODE, Attr::ATTR_PINNED, TestAttr::ATTR_TEST_SKUS, TestAttr::ATTR_TEST_UNTIL, 'name']);
 
         if ($onlyIds !== null) {
             $collection->addIdFilter($onlyIds);
@@ -88,9 +89,39 @@ class Applier
                 'name' => (string)$category->getName(),
                 'mode' => (string)$category->getData(Attr::ATTR_MODE),
                 'pinned' => $this->parseSkus((string)$category->getData(Attr::ATTR_PINNED)),
+                'testSkus' => $this->parseSkus((string)$category->getData(TestAttr::ATTR_TEST_SKUS)),
+                'testUntil' => $this->dateOnly((string)$category->getData(TestAttr::ATTR_TEST_UNTIL)),
             ];
         }
         return $result;
+    }
+
+    /**
+     * Test products count only until (and including) their end date.
+     *
+     * @return string[]
+     */
+    public function activeTests(array $skus, ?string $until): array
+    {
+        if ($skus === [] || $until === null || $until < gmdate('Y-m-d')) {
+            return [];
+        }
+        return $skus;
+    }
+
+    public function dateOnly(string $value): ?string
+    {
+        $time = $value !== '' ? strtotime($value) : false;
+        return $time ? gmdate('Y-m-d', $time) : null;
+    }
+
+    /**
+     * @param string[] $skus
+     * @return string[] SKUs that are another brand than our own
+     */
+    public function otherBrandSkus(array $skus): array
+    {
+        return $this->ranker->otherBrandSkus($skus);
     }
 
     /**
@@ -100,7 +131,7 @@ class Applier
     {
         $report = [];
         foreach ($this->getManagedCategories($onlyIds) as $categoryId => $settings) {
-            if ($onlyDue && !$this->isDue($categoryId, $settings['mode'])) {
+            if ($onlyDue && !$this->isDue($categoryId, $settings['mode'], $settings['testUntil'] ?? null)) {
                 continue;
             }
             try {
@@ -119,13 +150,17 @@ class Applier
      * Night job: a category is re-sorted when its last sort is older than the interval
      * (default every 2 days). A small margin makes sure "every 2 days" does not slip to 3.
      */
-    private function isDue(int $categoryId, string $mode): bool
+    private function isDue(int $categoryId, string $mode, ?string $testUntil = null): bool
     {
         if (!in_array($mode, SortMode::activeModes(), true)) {
             return true; // Standard with a backup left: restore
         }
         $last = $this->positions->getLastUpdated($categoryId);
         if ($last === null) {
+            return true;
+        }
+        // A test that ended since the last sort: re-sort now so the test product leaves its place.
+        if ($testUntil !== null && $testUntil < gmdate('Y-m-d') && strtotime($last . ' UTC') <= strtotime($testUntil . ' 23:59:59 UTC')) {
             return true;
         }
         $interval = $this->config->getIntervalDays() * 86400 - 6 * 3600;
@@ -167,7 +202,8 @@ class Applier
             $this->effectiveMode($categoryId, $settings['mode']),
             $this->positions->getBaseline($categoryId),
             $settings['pinned'],
-            $categoryId
+            $categoryId,
+            $this->activeTests($settings['testSkus'], $settings['testUntil'])
         );
     }
 
@@ -176,16 +212,31 @@ class Applier
      *
      * @return array{total: int, items: array<int, array<string, mixed>>, notInCategory: string[], lastUpdated: ?string}
      */
-    public function previewWith(int $categoryId, string $mode, string $pinnedRaw, int $limit = 12): array
-    {
+    public function previewWith(
+        int $categoryId,
+        string $mode,
+        string $pinnedRaw,
+        int $limit = 12,
+        ?string $testRaw = null,
+        ?string $testUntil = null
+    ): array {
+        if ($testRaw === null) {
+            $saved = $this->getManagedCategories([$categoryId])[$categoryId] ?? [];
+            $testSkus = $saved['testSkus'] ?? [];
+            $testUntil = $saved['testUntil'] ?? null;
+        } else {
+            $testSkus = $this->parseSkus($testRaw);
+            $testUntil = $this->dateOnly((string)$testUntil);
+        }
         $baseline = $this->positions->getBaseline($categoryId);
         $active = in_array($mode, SortMode::activeModes(), true);
         $readiness = $this->learning->getReadiness($categoryId);
         $mode = $this->effectiveMode($categoryId, $mode);
         $pinned = $active ? $this->parseSkus($pinnedRaw) : [];
+        $tests = $active ? $this->activeTests($testSkus, $testUntil) : [];
 
         $items = $active
-            ? $this->ranker->rank($mode, $baseline, $pinned, $categoryId)
+            ? $this->ranker->rank($mode, $baseline, $pinned, $categoryId, $tests)
             : $this->ranker->currentOrder($baseline);
 
         $inCategory = [];
@@ -193,7 +244,7 @@ class Applier
             $inCategory[mb_strtolower($item->sku)] = true;
         }
         $notInCategory = array_values(array_filter(
-            $pinned,
+            array_merge($pinned, $tests),
             static fn (string $sku): bool => !isset($inCategory[mb_strtolower($sku)])
         ));
 
@@ -213,6 +264,7 @@ class Applier
                 'views' => $item->views,
                 'clicks' => $item->clicks,
                 'ownBrand' => $item->ownBrand,
+                'testing' => $item->testing,
             ];
         }
 
@@ -223,6 +275,8 @@ class Applier
             'lastUpdated' => $this->positions->getLastUpdated($categoryId),
             'auto' => $readiness,
             'intervalDays' => $this->config->getIntervalDays(),
+            'otherBrands' => $this->otherBrandSkus(array_merge($pinned, $tests)),
+            'testUntil' => $tests ? $testUntil : null,
             'usedMode' => $active ? $mode : SortMode::STANDARD,
         ];
     }
@@ -240,7 +294,8 @@ class Applier
                 $this->effectiveMode($categoryId, $mode),
                 $this->positions->getBaseline($categoryId),
                 $settings['pinned'],
-                $categoryId
+                $categoryId,
+                $this->activeTests($settings['testSkus'] ?? [], $settings['testUntil'] ?? null)
             );
             $changed = $this->positions->write($categoryId, $this->targetPositions($ranked));
             $this->positions->markUpdated($categoryId, count($changed));

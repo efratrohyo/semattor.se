@@ -49,6 +49,21 @@ interface CategoryStatusInterface
     public function getPreview(): array;
 
     /**
+     * @return string Test product SKUs, comma separated
+     */
+    public function getTestSkus(): string;
+
+    /**
+     * @return string|null Last day of the test (Y-m-d)
+     */
+    public function getTestUntil(): ?string;
+
+    /**
+     * @return string[] Pinned or test SKUs that are NOT our own brand (shown above own brand products)
+     */
+    public function getOtherBrandSkus(): array;
+
+    /**
      * @return bool Auto (learning) has enough data for this category
      */
     public function getAutoReady(): bool;

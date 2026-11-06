@@ -47,6 +47,14 @@ class Config
         return min(100, max(1, $this->int('auto/sample_rate', 50)));
     }
 
+    /**
+     * Test products are shown from this place (1 = first).
+     */
+    public function getTestPlace(): int
+    {
+        return max(1, $this->int('general/test_place', 5));
+    }
+
     public function isOwnBrandFirst(): bool
     {
         return $this->scopeConfig->isSetFlag(self::PREFIX . 'general/own_brand_first');

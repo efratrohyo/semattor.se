@@ -96,8 +96,13 @@ class Learning
         $alpha0 = self::PRIOR_STRENGTH * $avgCtr;
         $beta0 = self::PRIOR_STRENGTH * (1 - $avgCtr);
         $minViews = $this->config->getAutoMinProductViews();
+        // Auto only TESTS our own brand. Other brands are never given a testing place
+        // (the merchant must approve that, through test products).
+        $onlyOwnTests = $this->config->isOwnBrandFirst();
 
-        $known = $unknown = [];
+        // Own brand (when "own brand first" is on): known + testing places. Other brands: by value only,
+        // never tested, and they come after our own brand anyway.
+        $groups = $onlyOwnTests ? ['own' => [], 'other' => []] : ['own' => []];
         foreach ($items as $item) {
             $id = $item->productId;
             $v = $views[$id] ?? 0;
@@ -109,31 +114,14 @@ class Learning
             $valuePerClick = (($revenue[$id] ?? 0.0) + self::VALUE_SMOOTHING * $avgValuePerClick)
                 / (($allClicks[$id] ?? 0) + self::VALUE_SMOOTHING);
             $item->score = $ctr * $valuePerClick;
-
-            if ($v >= $minViews) {
-                $known[] = $item;
-            } else {
-                $unknown[] = $item;
-            }
+            $groups[$onlyOwnTests && !$item->ownBrand ? 'other' : 'own'][] = $item;
         }
 
         $byScore = static fn (RankedItem $a, RankedItem $b): int => $b->score <=> $a->score;
-        usort($known, $byScore);
-        usort($unknown, $byScore);
-
-        // Every Nth place is a testing place (15% → every 7th place).
-        $share = $this->config->getAutoExploration();
-        $every = $share > 0 ? max(2, (int)round(100 / $share)) : PHP_INT_MAX;
-        $order = [];
-        $place = 0;
-        while ($known || $unknown) {
-            $place++;
-            $testPlace = $place % $every === 0;
-            if (($testPlace && $unknown) || !$known) {
-                $order[] = array_shift($unknown);
-            } else {
-                $order[] = array_shift($known);
-            }
+        $order = $this->withTestingPlaces($groups['own'], $minViews, $byScore);
+        if (isset($groups['other'])) {
+            usort($groups['other'], $byScore);
+            $order = array_merge($order, $groups['other']);
         }
 
         // Turn the final order into a score the Ranker can sort on (pins and sold out rules still apply).
@@ -142,6 +130,40 @@ class Learning
             $item->score = (float)($n - $i);
         }
         mt_srand(); // back to a random seed for the rest of the request
+    }
+
+    /**
+     * Every Nth place (15% → every 7th) goes to a product Auto knows little about.
+     *
+     * @param RankedItem[] $items
+     * @return RankedItem[]
+     */
+    private function withTestingPlaces(array $items, int $minViews, callable $byScore): array
+    {
+        $known = $unknown = [];
+        foreach ($items as $item) {
+            if ($item->views >= $minViews) {
+                $known[] = $item;
+            } else {
+                $unknown[] = $item;
+            }
+        }
+        usort($known, $byScore);
+        usort($unknown, $byScore);
+
+        $share = $this->config->getAutoExploration();
+        $every = $share > 0 ? max(2, (int)round(100 / $share)) : PHP_INT_MAX;
+        $order = [];
+        $place = 0;
+        while ($known || $unknown) {
+            $place++;
+            if (($place % $every === 0 && $unknown) || !$known) {
+                $order[] = array_shift($unknown);
+            } else {
+                $order[] = array_shift($known);
+            }
+        }
+        return $order;
     }
 
     public function record(int $storeId, int $categoryId, array $viewedIds, array $clickedIds): void
