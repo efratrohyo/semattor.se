@@ -34,7 +34,9 @@ What sells moves up, what does not moves down. Pinned SKUs first and sold out la
 
 **How often:** like all options, every 2 days at night (setting "Re-sort every X days").
 
-**Server load:** only 50% of category page views are measured (setting "Measure X% of category page
+**Server load:** the tracking script starts only when the page has loaded and the browser is idle.
+Clicks are received by `pub/shelfsense-track.php`, which does not start Magento (about 2-5 ms instead of
+about 100 ms per request). Only 50% of category page views are measured (setting "Measure X% of category page
 views"). A measured page sends one small request when the customer leaves it. Pages that are not
 measured do no work at all.
 
@@ -161,14 +163,23 @@ under Stores > Configuration in the role resources.
 
 ## Install
 
-Copy the folder to `app/code/Semattor/ShelfSense` in Magento and run:
+Unzip the zip in the Magento root. It puts the module in `app/code/Semattor/ShelfSense` and the fast
+tracking receiver in `pub/shelfsense-track.php`. Then run:
 
 ```bash
 bin/magento module:enable Semattor_ShelfSense
 bin/magento setup:upgrade
 bin/magento setup:di:compile
+bin/magento setup:static-content:deploy -f en_US sv_SE
 bin/magento cache:flush
+bin/magento shelfsense:install-endpoint
 ```
+
+The last command copies and tests the fast receiver. On **nginx**, Magento only runs a few PHP files in
+`pub/`. If the command says it does not answer, add `shelfsense-track` to the PHP line in the nginx
+config, e.g. `location ~ ^/(index|get|static|errors/report|errors/404|errors/503|health_check|shelfsense-track)\.php$`,
+reload nginx and run the command again. Until then the normal Magento endpoint is used, so nothing is lost.
+The receiver is also checked every night automatically.
 
 ## Command line (optional, for developers)
 

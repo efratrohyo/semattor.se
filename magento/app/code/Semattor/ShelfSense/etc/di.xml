@@ -10,6 +10,7 @@
         <arguments>
             <argument name="commands" xsi:type="array">
                 <item name="semattor_shelfsense_apply" xsi:type="object">Semattor\ShelfSense\Console\Command\ApplyCommand</item>
+                <item name="semattor_shelfsense_install_endpoint" xsi:type="object">Semattor\ShelfSense\Console\Command\InstallEndpointCommand</item>
             </argument>
         </arguments>
     </type>

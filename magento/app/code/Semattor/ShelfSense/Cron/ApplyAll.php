@@ -13,7 +13,8 @@ class ApplyAll
         private readonly Applier $applier,
         private readonly Config $config,
         private readonly LoggerInterface $logger,
-        private readonly \Semattor\ShelfSense\Model\Learning $learning
+        private readonly \Semattor\ShelfSense\Model\Learning $learning,
+        private readonly \Semattor\ShelfSense\Model\FastEndpoint $fastEndpoint
     ) {
     }
 
@@ -22,6 +23,8 @@ class ApplyAll
         if (!$this->config->isEnabled()) {
             return;
         }
+        // Use the fast tracking receiver only if it answers (falls back to Magento otherwise).
+        $this->fastEndpoint->check();
         // Keep 120 days of view/click statistics.
         $this->learning->purgeOlderThan(120);
         foreach ($this->applier->applyAll(null, true) as $categoryId => $row) {

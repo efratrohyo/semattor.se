@@ -12,6 +12,7 @@ $config = json_encode([
     'url' => $block->getCollectUrl(),
     'c' => $block->getCategoryId(),
     's' => $block->getSampleRate(),
+    'st' => $block->getStoreId(),
 ], JSON_UNESCAPED_SLASHES);
 $script = <<<JS
 (function (cfg) {
@@ -29,7 +30,7 @@ $script = <<<JS
     function flush() {
         if (sent || (!queueV.length && !queueK.length)) { return; }
         sent = true;
-        var body = JSON.stringify({ c: cfg.c, v: queueV.slice(0, 200), k: queueK.slice(0, 200) });
+        var body = JSON.stringify({ c: cfg.c, s: cfg.st, v: queueV.slice(0, 200), k: queueK.slice(0, 200) });
         try { navigator.sendBeacon(cfg.url, new Blob([body], { type: 'text/plain' })); } catch (e) {}
     }
 
@@ -61,14 +62,23 @@ $script = <<<JS
     });
     window.addEventListener('pagehide', flush);
 
-    watch();
-    // Ajax layered navigation / infinite scroll: watch new product items too.
-    if ('MutationObserver' in window) {
-        var pending = null;
-        new MutationObserver(function () {
-            if (!pending) { pending = setTimeout(function () { pending = null; watch(); }, 500); }
-        }).observe(document.body, { childList: true, subtree: true });
+    function start() {
+        watch();
+        // Ajax layered navigation / infinite scroll: watch new product items too.
+        if ('MutationObserver' in window) {
+            var pending = null;
+            new MutationObserver(function () {
+                if (!pending) { pending = setTimeout(function () { pending = null; watch(); }, 500); }
+            }).observe(document.body, { childList: true, subtree: true });
+        }
     }
+    // Start only when the page has loaded and the browser is idle, so it never slows the page down.
+    function whenIdle() {
+        if ('requestIdleCallback' in window) { requestIdleCallback(start, { timeout: 3000 }); }
+        else { setTimeout(start, 200); }
+    }
+    if (document.readyState === 'complete') { whenIdle(); }
+    else { window.addEventListener('load', whenIdle); }
 })($config);
 JS;
 ?>
