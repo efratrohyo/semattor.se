@@ -53,6 +53,32 @@
             </formElements>
         </field>
 
+        <field name="shelfsense_interval" formElement="select" sortOrder="15">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">category</item>
+                    <item name="component" xsi:type="string">Semattor_ShelfSense/js/form/segmented</item>
+                    <item name="elementTmpl" xsi:type="string">Semattor_ShelfSense/form/segmented</item>
+                    <item name="default" xsi:type="string">default</item>
+                    <item name="imports" xsi:type="array">
+                        <item name="visible" xsi:type="string">${ $.parentName }.shelfsense_mode:hasActiveMode</item>
+                    </item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>string</dataType>
+                <label translate="true">Re-sort</label>
+                <notice translate="true">How often this category gets a new order at night. Default = the shop setting (every 2 days). Every night suits campaigns; weekly suits quiet categories. Saving the category always sorts it right away.</notice>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Semattor\ShelfSense\Model\Source\ResortInterval"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
         <field name="shelfsense_pinned_skus" formElement="input" sortOrder="20">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
@@ -107,6 +133,7 @@
                     <item name="component" xsi:type="string">Semattor_ShelfSense/js/form/preview</item>
                     <item name="template" xsi:type="string">Semattor_ShelfSense/form/preview</item>
                     <item name="previewUrl" xsi:type="url" path="shelfsense/preview/index"/>
+                    <item name="sortNowUrl" xsi:type="url" path="shelfsense/sort/now"/>
                     <item name="imports" xsi:type="array">
                         <item name="mode" xsi:type="string">${ $.parentName }.shelfsense_mode:value</item>
                         <item name="pinned" xsi:type="string">${ $.parentName }.shelfsense_pinned_skus:value</item>

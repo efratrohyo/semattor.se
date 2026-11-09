@@ -1,0 +1,12 @@
+<div class="shelfsense-segmented" role="radiogroup">
+    <each args="data: options, as: 'option'">
+        <button type="button"
+                class="shelfsense-segmented__item"
+                role="radio"
+                css="'is-selected': $parent.isSelected(option)"
+                attr="'aria-checked': $parent.isSelected(option) ? 'true' : 'false'"
+                click="$parent.choose.bind($parent, option)"
+                disable="$parent.disabled"
+                text="option.label"></button>
+    </each>
+</div>

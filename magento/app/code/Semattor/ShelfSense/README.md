@@ -76,12 +76,13 @@ products, until the end date, then they go back automatically. Ask Claude for a 
 
 1. Click one of the 4 cards: **Standard**, **Newest first**, **Most relevant** or **Best sellers**.
    Each card says in one line what it does.
-2. Optional: **Pinned on top** – SKUs you always want first (only shown when a card other than Standard is chosen).
+2. **Re-sort**: how often this category gets a new order at night (Default / Every night / Every 2 days / Every 3 days / Weekly).
+   Optional: **Pinned on top** – SKUs you always want first (only shown when a card other than Standard is chosen).
 3. Look at the **preview** under the cards. It shows the first 12 products customers will see
    under "Populärt" – before you save. Tags show *Pinned*, *New*, *Sold out* and units sold.
    If a pinned SKU is not in the category, you get a warning.
 4. Click **Save**. The order is updated right away, and again every 2 days at night (setting).
-   The preview shows when it was last updated.
+   The preview shows when it was last updated. **Sort now** under the preview sorts it right away.
 
 **Stores → Configuration → Catalog → ShelfSense Sorting** (set once)
 Turn on/off, sold out last, number of days for sales, weights for "Most relevant", night schedule.

@@ -59,6 +59,7 @@ interface CategorySortManagementInterface
      * @param string|null $testUntil Y-m-d, last day of the test (required with testSkus)
      * @param bool $allowOtherBrands must be true to pin or test products that are not our own brand.
      *        Only send true after the merchant approved it in the conversation.
+     * @param int|null $resortDays re-sort every X days (1, 2, 3 or 7); 0 = shop default; null = keep
      * @return \Semattor\ShelfSense\Api\Data\CategoryStatusInterface
      * @throws \Magento\Framework\Exception\NoSuchEntityException
      * @throws \Magento\Framework\Exception\InputException
@@ -69,7 +70,8 @@ interface CategorySortManagementInterface
         ?string $pinnedSkus = null,
         ?string $testSkus = null,
         ?string $testUntil = null,
-        bool $allowOtherBrands = false
+        bool $allowOtherBrands = false,
+        ?int $resortDays = null
     ): \Semattor\ShelfSense\Api\Data\CategoryStatusInterface;
 
     /**

@@ -8,6 +8,9 @@ define(['uiComponent', 'jquery', 'underscore', 'mage/translate'], function (Comp
     return Component.extend({
         defaults: {
             previewUrl: '',
+            sortNowUrl: '',
+            sorting: false,
+            sortMessage: '',
             mode: '',
             pinned: '',
             testSkus: '',
@@ -33,7 +36,7 @@ define(['uiComponent', 'jquery', 'underscore', 'mage/translate'], function (Comp
         },
 
         initObservable: function () {
-            this._super().observe(['testSkus', 'testUntil', 'otherBrands', 'mode', 'pinned', 'loading', 'error', 'items', 'total', 'notInCategory', 'lastUpdated', 'autoStatus', 'usedMode']);
+            this._super().observe(['sorting', 'sortMessage', 'testSkus', 'testUntil', 'otherBrands', 'mode', 'pinned', 'loading', 'error', 'items', 'total', 'notInCategory', 'lastUpdated', 'autoStatus', 'usedMode']);
             this.schedule = _.debounce(this.load.bind(this), 400);
             return this;
         },
@@ -89,6 +92,33 @@ define(['uiComponent', 'jquery', 'underscore', 'mage/translate'], function (Comp
                 self.error($t('Could not load the preview. Try again.'));
             }).always(function () {
                 self.loading(false);
+            });
+        },
+
+        /**
+         * Re-sort now with the SAVED settings.
+         */
+        sortNow: function () {
+            var self = this,
+                id = this.getCategoryId();
+
+            if (!id || this.sorting()) {
+                return;
+            }
+            this.sorting(true);
+            this.sortMessage('');
+            $.ajax({
+                url: this.sortNowUrl,
+                type: 'POST',
+                dataType: 'json',
+                data: { category_id: id, form_key: window.FORM_KEY }
+            }).done(function (data) {
+                self.sortMessage(data.error || data.message || '');
+                self.load();
+            }).fail(function () {
+                self.sortMessage($t('Could not sort. Try again.'));
+            }).always(function () {
+                self.sorting(false);
             });
         },
 

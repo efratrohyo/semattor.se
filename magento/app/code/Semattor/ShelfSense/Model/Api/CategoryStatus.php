@@ -25,7 +25,8 @@ class CategoryStatus implements CategoryStatusInterface
         private readonly string $autoProgress = '',
         private readonly string $testSkus = '',
         private readonly ?string $testUntil = null,
-        private readonly array $otherBrandSkus = []
+        private readonly array $otherBrandSkus = [],
+        private readonly int $resortDays = 0
     ) {
     }
 
@@ -43,6 +44,7 @@ class CategoryStatus implements CategoryStatusInterface
     public function getTestSkus(): string { return $this->testSkus; }
     public function getTestUntil(): ?string { return $this->testUntil; }
     public function getOtherBrandSkus(): array { return $this->otherBrandSkus; }
+    public function getResortDays(): int { return $this->resortDays; }
 
     public function withMessage(string $message): self
     {

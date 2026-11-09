@@ -64,3 +64,13 @@
 .shelfsense-tag.is-new { background: #e7f5ec; color: #1f6b3a; }
 .shelfsense-tag.is-soldout { background: #fbe9e7; color: #a33224; }
 .shelfsense-preview__count { margin: 10px 0 0; font-size: 12px; color: #777; }
+
+.shelfsense-segmented { display: inline-flex; flex-wrap: wrap; border: 1px solid #adadad; border-radius: 6px; overflow: hidden; }
+.shelfsense-segmented__item { border: 0; border-right: 1px solid #adadad; background: #fff; padding: 7px 14px; font: inherit; font-size: 13px; color: #303030; cursor: pointer; }
+.shelfsense-segmented__item:last-child { border-right: 0; }
+.shelfsense-segmented__item:hover { background: #f4faff; }
+.shelfsense-segmented__item.is-selected { background: #007bdb; color: #fff; }
+.shelfsense-segmented__item:focus-visible { outline: 2px solid #007bdb; outline-offset: -2px; }
+.shelfsense-preview__foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+.shelfsense-preview__foot .shelfsense-preview__count { margin: 0; flex: 1; }
+.shelfsense-preview__sortmsg { font-size: 12px; color: #1f6b3a; }

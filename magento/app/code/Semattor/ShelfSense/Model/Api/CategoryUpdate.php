@@ -12,6 +12,7 @@ class CategoryUpdate implements CategoryUpdateInterface
     private ?string $pinnedSkus = null;
     private ?string $testSkus = null;
     private ?string $testUntil = null;
+    private ?int $resortDays = null;
 
     public function getCategoryId(): int { return $this->categoryId; }
     public function setCategoryId(int $categoryId): self { $this->categoryId = $categoryId; return $this; }
@@ -23,4 +24,6 @@ class CategoryUpdate implements CategoryUpdateInterface
     public function setTestSkus(?string $testSkus): self { $this->testSkus = $testSkus; return $this; }
     public function getTestUntil(): ?string { return $this->testUntil; }
     public function setTestUntil(?string $testUntil): self { $this->testUntil = $testUntil; return $this; }
+    public function getResortDays(): ?int { return $this->resortDays; }
+    public function setResortDays(?int $resortDays): self { $this->resortDays = $resortDays; return $this; }
 }

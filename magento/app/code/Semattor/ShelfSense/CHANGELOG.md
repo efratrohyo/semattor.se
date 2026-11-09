@@ -1,5 +1,10 @@
 # ShelfSense Sorting – changelog
 
+## 1.7.0 – 2026-11-09
+- Per category "Re-sort" buttons: Default / Every night / Every 2 days / Every 3 days / Weekly.
+- "Sort now" button under the preview (sorts right away with the saved settings).
+- API: `resortDays` per category.
+
 ## 1.6.0 – 2026-11-06
 - Fast tracking receiver `pub/shelfsense-track.php` (2-5 ms, does not start Magento), checked every night, falls back to Magento.
 - New command `bin/magento shelfsense:install-endpoint`.

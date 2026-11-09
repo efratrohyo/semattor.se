@@ -15,6 +15,7 @@ use Semattor\ShelfSense\Model\PositionManager;
 use Semattor\ShelfSense\Model\Source\SortMode;
 use Semattor\ShelfSense\Setup\Patch\Data\AddCategoryAttributes as Attr;
 use Semattor\ShelfSense\Setup\Patch\Data\AddTestAttributes as TestAttr;
+use Semattor\ShelfSense\Setup\Patch\Data\AddIntervalAttribute as IntervalAttr;
 
 class CategorySortManagement implements CategorySortManagementInterface
 {
@@ -41,7 +42,7 @@ class CategorySortManagement implements CategorySortManagementInterface
 
         $collection = $this->categoryCollectionFactory->create();
         $collection->setStoreId(0)
-            ->addAttributeToSelect(['name', Attr::ATTR_MODE, Attr::ATTR_PINNED, TestAttr::ATTR_TEST_SKUS, TestAttr::ATTR_TEST_UNTIL])
+            ->addAttributeToSelect(['name', Attr::ATTR_MODE, Attr::ATTR_PINNED, TestAttr::ATTR_TEST_SKUS, TestAttr::ATTR_TEST_UNTIL, IntervalAttr::ATTR_INTERVAL])
             ->addFieldToFilter('level', ['gteq' => 2])
             ->setOrder('path', 'ASC');
         $result = [];
@@ -52,6 +53,7 @@ class CategorySortManagement implements CategorySortManagementInterface
                 'pinned' => $this->applier->parseSkus((string)$category->getData(Attr::ATTR_PINNED)),
                 'testSkus' => $this->applier->parseSkus((string)$category->getData(TestAttr::ATTR_TEST_SKUS)),
                 'testUntil' => $this->applier->dateOnly((string)$category->getData(TestAttr::ATTR_TEST_UNTIL)),
+                'intervalDays' => $this->applier->intervalDays((string)$category->getData(IntervalAttr::ATTR_INTERVAL)),
             ]);
         }
         return $result;
@@ -105,8 +107,12 @@ class CategorySortManagement implements CategorySortManagementInterface
         ?string $pinnedSkus = null,
         ?string $testSkus = null,
         ?string $testUntil = null,
-        bool $allowOtherBrands = false
+        bool $allowOtherBrands = false,
+        ?int $resortDays = null
     ): CategoryStatusInterface {
+        if ($resortDays !== null && !in_array($resortDays, [0, 1, 2, 3, 7], true)) {
+            throw new InputException(__('resortDays must be 0 (shop default), 1, 2, 3 or 7.'));
+        }
         $mode = $this->validMode($mode);
         $current = $this->settings($categoryId); // 404 if missing
         if ($mode === SortMode::AUTO && $current['mode'] !== SortMode::AUTO) {
@@ -150,6 +156,10 @@ class CategorySortManagement implements CategorySortManagementInterface
             $category->setData(Attr::ATTR_PINNED, implode(', ', $this->applier->parseSkus($pinnedSkus)));
             $this->categoryResource->saveAttribute($category, Attr::ATTR_PINNED);
         }
+        if ($resortDays !== null) {
+            $category->setData(IntervalAttr::ATTR_INTERVAL, $resortDays === 0 ? 'default' : (string)$resortDays);
+            $this->categoryResource->saveAttribute($category, IntervalAttr::ATTR_INTERVAL);
+        }
         if ($testSkus !== null) {
             $skus = $this->applier->parseSkus($testSkus);
             $category->setData(TestAttr::ATTR_TEST_SKUS, implode(', ', $skus));
@@ -180,7 +190,8 @@ class CategorySortManagement implements CategorySortManagementInterface
                 $update->getPinnedSkus(),
                 $update->getTestSkus(),
                 $update->getTestUntil(),
-                $allowOtherBrands
+                $allowOtherBrands,
+                $update->getResortDays()
             );
         }
         return $result;
@@ -234,7 +245,9 @@ class CategorySortManagement implements CategorySortManagementInterface
             false,
             '',
             implode(', ', $settings['testSkus'] ?? []),
-            $settings['testUntil'] ?? null
+            $settings['testUntil'] ?? null,
+            [],
+            (int)($settings['intervalDays'] ?? 0)
         );
     }
 
@@ -293,7 +306,8 @@ class CategorySortManagement implements CategorySortManagementInterface
             $this->progress($data['auto']),
             implode(', ', $testRaw !== null ? $this->applier->parseSkus($testRaw) : ($settings['testSkus'] ?? [])),
             $data['testUntil'] ?? ($testRaw === null ? ($settings['testUntil'] ?? null) : $this->applier->dateOnly((string)$testUntil)),
-            $data['otherBrands'] ?? []
+            $data['otherBrands'] ?? [],
+            (int)($data['intervalDays'] ?? 0)
         );
     }
 

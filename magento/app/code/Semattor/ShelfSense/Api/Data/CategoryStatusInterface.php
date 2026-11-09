@@ -64,6 +64,11 @@ interface CategoryStatusInterface
     public function getOtherBrandSkus(): array;
 
     /**
+     * @return int Re-sorted every X days (category choice or shop default)
+     */
+    public function getResortDays(): int;
+
+    /**
      * @return bool Auto (learning) has enough data for this category
      */
     public function getAutoReady(): bool;

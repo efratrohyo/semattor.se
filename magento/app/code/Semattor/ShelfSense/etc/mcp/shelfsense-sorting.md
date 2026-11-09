@@ -50,6 +50,10 @@ How to read and change ShelfSense Sorting through the REST API: which order cust
 - Other-brand SKUs are refused unless `allowOtherBrands: true` (rule 2).
 - Report after the test: views and clicks in `semattor_shelfsense_stats` and sales of the test SKUs during the test, compared with the SE Mattor products around them.
 
+### How often a category is re-sorted
+- Each category can choose: shop default (`resortDays: 0`, default every 2 days), every night (`1`), every 2 days (`2`), every 3 days (`3`) or weekly (`7`). Send `resortDays` with PUT. Campaigns: every night. Quiet categories: weekly.
+- `POST /V1/shelfsense/categories/{id}/sort` re-sorts right away (same as the "Sort now" button in admin).
+
 ### Many categories at once
 `PUT /V1/shelfsense/categories` with body `{"categories": [{"categoryId": 507, "mode": "newest"}, {"categoryId": 389, "mode": "bestseller"}], "allowOtherBrands": false}`. Max 100. Each item takes the same fields as the single save (`pinnedSkus`, `testSkus`, `testUntil`). Preview the biggest ones first.
 

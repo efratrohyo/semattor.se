@@ -15,6 +15,7 @@ use Psr\Log\LoggerInterface;
 use Semattor\ShelfSense\Model\Source\SortMode;
 use Semattor\ShelfSense\Setup\Patch\Data\AddCategoryAttributes as Attr;
 use Semattor\ShelfSense\Setup\Patch\Data\AddTestAttributes as TestAttr;
+use Semattor\ShelfSense\Setup\Patch\Data\AddIntervalAttribute as IntervalAttr;
 
 /**
  * Applies (or undoes) ShelfSense for categories, then refreshes indexes and page cache
@@ -70,7 +71,7 @@ class Applier
     {
         $collection = $this->categoryCollectionFactory->create();
         $collection->setStoreId(0)
-            ->addAttributeToSelect([Attr::ATTR_MODE, Attr::ATTR_PINNED, TestAttr::ATTR_TEST_SKUS, TestAttr::ATTR_TEST_UNTIL, 'name']);
+            ->addAttributeToSelect([Attr::ATTR_MODE, Attr::ATTR_PINNED, TestAttr::ATTR_TEST_SKUS, TestAttr::ATTR_TEST_UNTIL, IntervalAttr::ATTR_INTERVAL, 'name']);
 
         if ($onlyIds !== null) {
             $collection->addIdFilter($onlyIds);
@@ -91,6 +92,7 @@ class Applier
                 'pinned' => $this->parseSkus((string)$category->getData(Attr::ATTR_PINNED)),
                 'testSkus' => $this->parseSkus((string)$category->getData(TestAttr::ATTR_TEST_SKUS)),
                 'testUntil' => $this->dateOnly((string)$category->getData(TestAttr::ATTR_TEST_UNTIL)),
+                'intervalDays' => $this->intervalDays((string)$category->getData(IntervalAttr::ATTR_INTERVAL)),
             ];
         }
         return $result;
@@ -131,7 +133,12 @@ class Applier
     {
         $report = [];
         foreach ($this->getManagedCategories($onlyIds) as $categoryId => $settings) {
-            if ($onlyDue && !$this->isDue($categoryId, $settings['mode'], $settings['testUntil'] ?? null)) {
+            if ($onlyDue && !$this->isDue(
+                $categoryId,
+                $settings['mode'],
+                $settings['testUntil'] ?? null,
+                $settings['intervalDays'] ?? $this->config->getIntervalDays()
+            )) {
                 continue;
             }
             try {
@@ -150,7 +157,15 @@ class Applier
      * Night job: a category is re-sorted when its last sort is older than the interval
      * (default every 2 days). A small margin makes sure "every 2 days" does not slip to 3.
      */
-    private function isDue(int $categoryId, string $mode, ?string $testUntil = null): bool
+    /**
+     * Days between re-sorts for a category: its own choice, or the global setting.
+     */
+    public function intervalDays(string $value): int
+    {
+        return ctype_digit($value) && (int)$value > 0 ? (int)$value : $this->config->getIntervalDays();
+    }
+
+    private function isDue(int $categoryId, string $mode, ?string $testUntil = null, ?int $intervalDays = null): bool
     {
         if (!in_array($mode, SortMode::activeModes(), true)) {
             return true; // Standard with a backup left: restore
@@ -163,7 +178,7 @@ class Applier
         if ($testUntil !== null && $testUntil < gmdate('Y-m-d') && strtotime($last . ' UTC') <= strtotime($testUntil . ' 23:59:59 UTC')) {
             return true;
         }
-        $interval = $this->config->getIntervalDays() * 86400 - 6 * 3600;
+        $interval = ($intervalDays ?? $this->config->getIntervalDays()) * 86400 - 6 * 3600;
         return strtotime($last . ' UTC') <= time() - $interval;
     }
 
@@ -274,7 +289,8 @@ class Applier
             'notInCategory' => $notInCategory,
             'lastUpdated' => $this->positions->getLastUpdated($categoryId),
             'auto' => $readiness,
-            'intervalDays' => $this->config->getIntervalDays(),
+            'intervalDays' => ($this->getManagedCategories([$categoryId])[$categoryId]['intervalDays'] ?? null)
+                ?? $this->config->getIntervalDays(),
             'otherBrands' => $this->otherBrandSkus(array_merge($pinned, $tests)),
             'testUntil' => $tests ? $testUntil : null,
             'usedMode' => $active ? $mode : SortMode::STANDARD,

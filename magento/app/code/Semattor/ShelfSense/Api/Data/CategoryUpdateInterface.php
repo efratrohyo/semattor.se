@@ -62,4 +62,15 @@ interface CategoryUpdateInterface
      * @return $this
      */
     public function setTestUntil(?string $testUntil): self;
+
+    /**
+     * @return int|null
+     */
+    public function getResortDays(): ?int;
+
+    /**
+     * @param int|null $resortDays
+     * @return $this
+     */
+    public function setResortDays(?int $resortDays): self;
 }

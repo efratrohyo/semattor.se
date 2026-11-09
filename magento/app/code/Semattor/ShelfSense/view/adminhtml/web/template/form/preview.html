@@ -37,5 +37,13 @@
             </li>
         </each>
     </ol>
-    <p class="shelfsense-preview__count" if="items().length" text="countText()"></p>
+    <div class="shelfsense-preview__foot">
+        <p class="shelfsense-preview__count" if="items().length" text="countText()"></p>
+        <span class="shelfsense-preview__sortmsg" if="sortMessage()" text="sortMessage()"></span>
+        <button type="button" class="action-secondary" if="isActive()"
+                click="sortNow" disable="sorting"
+                attr="title: $t('Sorts the category now with the saved settings. Click Save first if you changed something.')">
+            <span translate="'Sort now'"></span>
+        </button>
+    </div>
 </div>
