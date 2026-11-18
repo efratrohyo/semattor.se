@@ -1,5 +1,11 @@
 # ShelfSense Sorting – changelog
 
+## 1.8.0 – 2026-11-18
+- Removed the standalone `pub/shelfsense-track.php` receiver, `Model/FastEndpoint` and
+  `bin/magento shelfsense:install-endpoint`. Tracking uses only the standard Magento controller
+  (`shelfsense/track/collect`): no files outside `app/code`, no direct `env.php` reads, no nginx changes.
+- Upgrading from 1.6.0/1.7.0: delete `pub/shelfsense-track.php` and undo the nginx line if it was added.
+
 ## 1.7.0 – 2026-11-09
 - Per category "Re-sort" buttons: Default / Every night / Every 2 days / Every 3 days / Weekly.
 - "Sort now" button under the preview (sorts right away with the saved settings).

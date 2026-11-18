@@ -14,7 +14,6 @@ class Tracker extends Template
         Context $context,
         private readonly Resolver $layerResolver,
         private readonly Config $config,
-        private readonly \Semattor\ShelfSense\Model\FastEndpoint $fastEndpoint,
         array $data = []
     ) {
         parent::__construct($context, $data);
@@ -33,9 +32,7 @@ class Tracker extends Template
 
     public function getCollectUrl(): string
     {
-        return $this->fastEndpoint->isAvailable()
-            ? $this->fastEndpoint->url()
-            : $this->getUrl('shelfsense/track/collect');
+        return $this->getUrl('shelfsense/track/collect');
     }
 
     public function getStoreId(): int
